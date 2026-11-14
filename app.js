@@ -665,8 +665,7 @@ function welcome(note) {
       ${note ? `<div class="err" role="alert">${esc(note)}</div>` : ''}
       ${saved.length ? `<p class="small muted" style="margin:0 0 8px">${T('savedHere')}</p><div class="accts">${saved.map(a => `<button class="acct" type="button" data-acct="${esc(a.uid)}">${avatar({ n: a.n || a.em, col: '#2F7BFF', img: a.img }, 'round')}<span class="who"><b>${esc(a.n || a.em)}</b><small>${esc(maskEmail(a.em))}</small></span><span class="tag ${a.rt ? '' : 'off'}">${a.rt ? T('connected') : (a.pv && a.pv !== 'password' ? PNAME[a.pv] : T('needPw'))}</span></button>`).join('')}</div><div class="sep">•</div>` : ''}
       <div class="err" id="wErr" role="alert" hidden></div>
-      ${socialButtons()}
-      <div class="sep">${T('orEmail')}</div>
+      ${socialBlock()}
       <div class="col">
         <button class="btn pri block" type="button" data-go="signup">${T('signup')}</button>
         <button class="btn ghost block" type="button" data-go="signin">${T('signin')}</button>
@@ -674,7 +673,6 @@ function welcome(note) {
       <p class="hint" style="text-align:center;margin-top:12px">${T('socialAgree', { u: PRIVACY_URL })}</p>
       ${REQUIRE_ACCOUNT ? '' : `<div class="mt" style="text-align:center"><button class="link" type="button" data-go="guest">${T('guest')}</button><p class="hint" style="text-align:center">${T('guestNote')}</p></div>`}
     </div>`);
-  loadSdk().catch(() => {});
   st.onclick = e => {
     const s = e.target.closest('[data-soc]'); if (s) { socialSignIn(s.dataset.soc, s, $('#wErr')); return; }
     const a = e.target.closest('[data-acct]');
@@ -692,14 +690,13 @@ function signin(email) {
   VIEW.name = 'signin'; VIEW.redraw = null;
   const st = stage(formShell(T('signinT'), '', `
     <div class="err" id="fErr" role="alert" hidden></div>
-    ${email ? '' : socialButtons() + `<div class="sep">${T('orEmail')}</div>`}
+    ${email ? '' : socialBlock()}
     <label class="fld"><span>${T('email')}</span><input class="inp ltr" type="email" id="fEm" autocomplete="username" inputmode="email" required value="${esc(email || '')}"></label>
     ${pwField('fPw', T('password'), 'current-password', email ? 'autofocus' : '')}
     <div class="row between" style="margin:-4px 0 14px"><button class="link" type="button" data-go="forgot">${T('forgot')}</button></div>
     <button class="btn pri block" type="submit">${T('doSignin')}</button>
     <p class="small muted mt" style="text-align:center">${T('noAcct')} <button class="link" type="button" data-go="signup">${T('createIt')}</button></p>`), { fx: false });
   wireEyes(st);
-  loadSdk().catch(() => {});
   st.onclick = e => { const so = e.target.closest('[data-soc]'); if (so) { socialSignIn(so.dataset.soc, so, $('#fErr')); return; } const g = e.target.closest('[data-go]'); if (!g) return; if (g.dataset.go === 'welcome') welcome(); else if (g.dataset.go === 'signup') signup(); else forgot($('#fEm').value.trim()); };
   $('form', st).onsubmit = async e => {
     e.preventDefault();
@@ -853,7 +850,30 @@ async function socialSignIn(k, btn, er) {
     const m = socialErr(x); if (m && er) { er.textContent = m; er.hidden = false; }
   }
 }
-const socialButtons = () => `<div class="col soc">${SOCIAL.map(k => `<button class="btn block sbtn ${k}" type="button" data-soc="${k}">${BRAND[k]}<span>${T('with' + k[0].toUpperCase() + k.slice(1))}</span></button>`).join('')}</div>`;
+const socialButtons = (list = SOCIAL) => `<div class="col soc">${list.map(k => `<button class="btn block sbtn ${k}" type="button" data-soc="${k}">${BRAND[k]}<span>${T('with' + k[0].toUpperCase() + k.slice(1))}</span></button>`).join('')}</div>`;
+/* Only show the providers that are actually switched on in Firebase, so nobody meets a button that cannot work.
+   Firebase answers createAuthUri only for an enabled provider on an authorized domain. Checked once an hour. */
+const SOC_KEY = 'dpa_soc';
+let SOC_ON = (() => { const c = LS.get(SOC_KEY, null); return c && c.t > now() - 3600000 && Array.isArray(c.on) ? c.on.filter(k => SOCIAL.includes(k)) : null; })();
+let socP = null;
+function probeSocial() {
+  if (SOC_ON) return Promise.resolve(SOC_ON);
+  if (!socP) {
+    let sure = true;
+    socP = Promise.all(SOCIAL.map(k => authCall('createAuthUri', { providerId: PID[k], continueUri: location.origin + location.pathname })
+      .then(j => (j && j.authUri ? k : null))
+      .catch(e => { if (!(e instanceof ApiErr) || !e.status || e.status >= 500) sure = false; return null; })))
+      .then(r => { const on = r.filter(Boolean); if (sure) { SOC_ON = on; LS.set(SOC_KEY, { t: now(), on }); } socP = null; return on; });
+  }
+  return socP;
+}
+/* the social buttons plus the "or with email" line; filled in as soon as we know which providers are on */
+function socialBlock() {
+  const inner = list => list.length ? socialButtons(list) + `<div class="sep">${T('orEmail')}</div>` : '';
+  if (!SOC_ON) probeSocial().then(on => { const b = $('#socBlk'); if (b && !b.dataset.done) { b.dataset.done = 1; b.innerHTML = inner(on); if (on.length) loadSdk().catch(() => {}); } });
+  else if (SOC_ON.length) loadSdk().catch(() => {});
+  return `<div id="socBlk"${SOC_ON ? ' data-done="1"' : ''}>${SOC_ON ? inner(SOC_ON) : ''}</div>`;
+}
 
 /* who is watching */
 function picker(user, opts = {}) {
