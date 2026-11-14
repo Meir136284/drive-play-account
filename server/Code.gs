@@ -12,18 +12,18 @@
  * Settings live in Project Settings → Script properties (see SETUP.md).
  */
 
+/* Grow asks for no special characters in any field, so names use plain words and hyphens only */
 const PLANS = {
-  m: { sum: 14.90, months: 1, name: 'Drive Play Pro – חודש' },
-  y: { sum: 119.00, months: 12, name: 'Drive Play Pro – שנה' }
+  m: { sum: 14.90, months: 1, name: 'Drive Play Pro - מנוי לחודש' },
+  y: { sum: 119.00, months: 12, name: 'Drive Play Pro - מנוי לשנה' }
 };
 
 function prop_(k, d) { const v = PropertiesService.getScriptProperties().getProperty(k); return v == null || v === '' ? d : v; }
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 
-/* run once from the editor: creates the secret that protects the Grow notification address */
+/* run once from the editor: checks the settings and asks for the permissions */
 function setup() {
-  if (!prop_('NOTIFY_SECRET')) PropertiesService.getScriptProperties().setProperty('NOTIFY_SECRET', Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, ''));
-  ['FIREBASE_API_KEY', 'FIREBASE_PROJECT', 'GROW_USER_ID', 'GROW_PAGE_CODE', 'WEB_APP_URL', 'RETURN_URL'].forEach(k => { if (!prop_(k)) console.warn('Missing script property: ' + k); });
+  ['FIREBASE_PROJECT', 'GROW_USER_ID', 'GROW_PAGE_CODE', 'WEB_APP_URL', 'RETURN_URL'].forEach(k => { if (!prop_(k)) console.warn('Missing script property: ' + k); });
   fsGet_('ent/_check');   // makes the editor ask for the Firestore permission now
   console.log('Setup OK. Grow environment: ' + growEnv_());
 }
@@ -32,7 +32,10 @@ function doGet() { return json_({ ok: true, service: 'drive-play-pay', env: grow
 
 function doPost(e) {
   try {
-    if (e && e.parameter && e.parameter.a === 'notify') return notify_(e);
+    /* Grow's notification is a form post (data[...] fields); the checkout request is JSON sent as text */
+    const t = (e && e.postData && e.postData.type) || '';
+    const prm = (e && e.parameter) || {};
+    if (/form-urlencoded|multipart/.test(t) || prm['data[processId]'] != null || prm['data[customFields][cField1]'] != null) return notify_(e);
     const b = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (b.a === 'checkout') return json_(checkout_(b));
     return json_({ err: 'bad_request' });
@@ -48,8 +51,15 @@ function checkout_(b) {
   if (!plan) return { err: 'plan' };
   const user = verifyUser_(b.idToken);
   if (!user) return { err: 'auth' };
+  const name = String(b.name || '').replace(/[^\p{L}\p{M}' -]/gu, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+  if (name.split(' ').filter(function (w) { return w.replace(/[' -]/g, '').length >= 2; }).length < 2) return { err: 'name' };
+  let phone = String(b.phone || '').replace(/\D/g, '');
+  if (phone.indexOf('972') === 0) phone = '0' + phone.slice(3);
+  if (!/^05\d{8}$/.test(phone)) return { err: 'phone' };
   const oid = Utilities.getUuid().replace(/-/g, '');
-  fsSet_('orders/' + oid, { uid: user.uid, em: user.email, plan: b.plan, sum: plan.sum, st: 'new', c: Date.now() });
+  /* a random code per order: Grow sends it back in the notification, so a forged notification can't turn Pro on */
+  const tok = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  fsSet_('orders/' + oid, { uid: user.uid, em: user.email, plan: b.plan, sum: plan.sum, st: 'new', tok: tok, c: Date.now() });
   const ret = prop_('RETURN_URL', '');
   const req = {
     pageCode: prop_('GROW_PAGE_CODE'),
@@ -60,12 +70,14 @@ function checkout_(b) {
     description: plan.name,
     successUrl: ret + (ret.indexOf('?') < 0 ? '?' : '&') + 's=ok',
     cancelUrl: ret + (ret.indexOf('?') < 0 ? '?' : '&') + 's=cancel',
-    notifyUrl: prop_('WEB_APP_URL') + '?a=notify&k=' + prop_('NOTIFY_SECRET'),
+    notifyUrl: prop_('WEB_APP_URL'),
     cField1: oid,
-    cField2: user.uid
+    cField2: tok,
+    'pageField[fullName]': name,
+    'pageField[phone]': phone
   };
   if (prop_('GROW_API_KEY')) req.apiKey = prop_('GROW_API_KEY');
-  if (user.email) req['pageField[email]'] = user.email;
+  if (user.email && /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(user.email)) req['pageField[email]'] = user.email;
   const r = grow_('createPaymentProcess', req);
   const d = r && r.data;
   if (!r || String(r.status) !== '1' || !d || !d.url) {
@@ -79,10 +91,10 @@ function checkout_(b) {
 
 /* ---------- Grow's notification after a payment ---------- */
 function notify_(e) {
-  if (e.parameter.k !== prop_('NOTIFY_SECRET')) { console.warn('notify with a wrong secret'); return ContentService.createTextOutput('no'); }
   const p = flatParams_(e);
   const g = function () { for (var i = 0; i < arguments.length; i++) { var v = p[arguments[i]]; if (v != null && v !== '') return String(v); } return ''; };
   const oid = g('data[customFields][cField1]', 'data[cField1]', 'customFields[cField1]', 'cField1');
+  const tok = g('data[customFields][cField2]', 'data[cField2]', 'customFields[cField2]', 'cField2');
   const status = g('status');
   const code = g('data[statusCode]', 'statusCode');
   const sum = parseFloat(g('data[sum]', 'sum') || '0');
@@ -94,6 +106,9 @@ function notify_(e) {
   try {
     const order = fsGet_('orders/' + oid);
     if (!order) { console.warn('unknown order ' + oid); return ContentService.createTextOutput('ok'); }
+    /* the notification must carry the order's own code; if Grow left it out, ask Grow directly */
+    const genuine = (tok && order.tok && tok === order.tok) || (!tok && confirmWithGrow_(order));
+    if (!genuine) { console.warn('notify for order ' + oid + ' could not be confirmed'); return ContentService.createTextOutput('ok'); }
     const paid = status === '1' && (!code || code === '2');
     if (order.st !== 'paid') {
       const plan = PLANS[order.plan];
@@ -123,6 +138,20 @@ function approve_(p) {
   if (prop_('GROW_API_KEY')) req.apiKey = prop_('GROW_API_KEY');
   const r = grow_('approveTransaction', req);
   if (!r || String(r.status) !== '1') console.warn('approveTransaction: ' + JSON.stringify(r));
+}
+
+/* asks Grow for the state of the payment page of this order (used when the notification has no order code) */
+function confirmWithGrow_(order) {
+  if (!order.pid || !order.ptok) return false;
+  const req = { pageCode: prop_('GROW_PAGE_CODE'), processId: order.pid, processToken: order.ptok };
+  if (prop_('GROW_API_KEY')) req.apiKey = prop_('GROW_API_KEY');
+  const r = grow_('getPaymentProcessInfo', req);
+  console.log('getPaymentProcessInfo: ' + JSON.stringify(r).slice(0, 500));
+  if (!r || String(r.status) !== '1') return false;
+  let ok = false;
+  const walk = function (o) { if (!o || typeof o !== 'object') return; Object.keys(o).forEach(function (k) { if (k === 'statusCode' && String(o[k]) === '2') ok = true; else walk(o[k]); }); };
+  walk(r.data);
+  return ok;
 }
 
 /* manual grant, for gifts and support: run from the editor, e.g. grantPro('someone@gmail.com', 1) */
@@ -161,13 +190,18 @@ function flatParams_(e) {
   }
   return p;
 }
+/* checks the sign-in token with Firebase. The browser key only works from the site's address,
+   so the server asks with the project owner's permission instead. */
 function verifyUser_(idToken) {
-  if (!idToken) return null;
-  const r = UrlFetchApp.fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + prop_('FIREBASE_API_KEY'), {
-    method: 'post', contentType: 'application/json', payload: JSON.stringify({ idToken: idToken }), muteHttpExceptions: true });
-  if (r.getResponseCode() !== 200) return null;
+  if (!idToken || String(idToken).length > 4000) return null;
+  const pr = prop_('FIREBASE_PROJECT');
+  const r = UrlFetchApp.fetch('https://identitytoolkit.googleapis.com/v1/projects/' + pr + '/accounts:lookup', {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken(), 'x-goog-user-project': pr },
+    payload: JSON.stringify({ idToken: idToken }) });
+  if (r.getResponseCode() !== 200) { console.warn('accounts:lookup ' + r.getResponseCode() + ': ' + r.getContentText().slice(0, 200)); return null; }
   const u = (JSON.parse(r.getContentText()).users || [])[0];
-  return u && u.localId ? { uid: u.localId, email: u.email || '' } : null;
+  return u && u.localId && !u.disabled ? { uid: u.localId, email: u.email || '' } : null;
 }
 function addMonths_(t, n) { const d = new Date(t); const day = d.getDate(); d.setMonth(d.getMonth() + n); if (d.getDate() < day) d.setDate(0); return d.getTime(); }
 function logSale_(order, sum, tx, until) {

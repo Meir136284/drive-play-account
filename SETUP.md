@@ -36,7 +36,6 @@ Firestore Database → Rules → מדביקים את התוכן של `firestore.
 
 | שם | ערך |
 |---|---|
-| `FIREBASE_API_KEY` | `AIzaSyAJijGrpQ6rIjhtjkHmMrUKxVfoh6o7v2w` |
 | `FIREBASE_PROJECT` | `bustling-walker-439912-m7` |
 | `GROW_USER_ID` | מ-Grow |
 | `GROW_PAGE_CODE` | מ-Grow |
@@ -49,6 +48,8 @@ Firestore Database → Rules → מדביקים את התוכן של `firestore.
 5. Deploy → New deployment → Web app → Execute as: **Me**, Who has access: **Anyone** → Deploy. מעתיקים את כתובת ה-Web app.
 6. מוסיפים Script property בשם `WEB_APP_URL` עם הכתובת הזו.
 7. ב-`app.js` מדביקים את הכתובת ב-`const PAY_API = '';` ומעלים.
+
+מה השרת שולח ל-Grow: הסכום, שם המוצר, שם מלא וטלפון נייד של הקונה (Grow מחייבת את שניהם – הם נאספים במסך הרכישה), האימייל של החשבון, ושני שדות פנימיים: מספר ההזמנה וקוד אקראי של ההזמנה. Grow מחזירה את הקוד בהודעת התשלום, ורק הודעה עם הקוד הנכון מפעילה Pro. אם הקוד לא חזר, השרת שואל את Grow ישירות (`getPaymentProcessInfo`).
 
 בדיקה: בסביבת sandbox של Grow קונים חודש בכרטיס בדיקה. אחרי כמה שניות החשבון אמור להפוך ל-Pro. אם לא – ב-Apps Script → Executions רואים מה Grow שלח. כשהכל עובד מחליפים את `GROW_ENV` ל-`production` ואת הפרטים לפרטים האמיתיים.
 

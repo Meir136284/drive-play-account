@@ -139,7 +139,7 @@ const STR = {
     planM: 'חודש', planY: 'שנה', perM: 'לחודש', perY: 'לשנה', save2: 'חודשיים מתנה', buy: 'רכישה', extend: 'הארכה',
     payNote: 'תשלום מאובטח בכרטיס אשראי, Bit, Apple Pay או Google Pay. אין חיוב חוזר – מאריכים מתי שרוצים.',
     payOpen: 'פתחנו את דף התשלום בחלון חדש. אחרי התשלום Pro יופעל כאן אוטומטית.', payWait: 'מחכים לאישור התשלום…',
-    payDone: 'התשלום התקבל! Drive Play Pro פעיל עד {d}.', payOff: 'הרכישה עוד לא נפתחה. נסו שוב בקרוב.',
+    payDone: 'התשלום התקבל. Drive Play Pro פעיל עד {d}.', payName: 'שם מלא', payPhone: 'טלפון נייד', payWhy: 'חברת הסליקה Grow מבקשת שם וטלפון נייד לכל תשלום, והקבלה נשלחת לאימייל של החשבון.', payNameErr: 'כתבו שם פרטי ושם משפחה.', payPhoneErr: 'כתבו מספר נייד ישראלי, למשל 0501234567.', payOff: 'הרכישה עוד לא נפתחה. נסו שוב בקרוב.',
     payErr: 'לא הצלחנו לפתוח את דף התשלום. נסו שוב.', proPage: 'הדף הזה חלק מ-Drive Play Pro', proPageS: 'שדרגו כדי לפתוח את {n}.',
     toHome: 'חזרה לדף הבית', kidsPro: 'בקשו ממבוגר בבית לשדרג את החשבון.', proBadge: 'PRO'
   },
@@ -209,7 +209,7 @@ const STR = {
     planM: 'Month', planY: 'Year', perM: 'per month', perY: 'per year', save2: '2 months free', buy: 'Buy', extend: 'Extend',
     payNote: 'Secure payment by card, Bit, Apple Pay or Google Pay. No automatic renewal – extend whenever you like.',
     payOpen: 'The payment page opened in a new window. Pro turns on here automatically after you pay.', payWait: 'Waiting for the payment…',
-    payDone: 'Payment received! Drive Play Pro is active until {d}.', payOff: 'Purchases are not open yet. Please try again soon.',
+    payDone: 'Payment received. Drive Play Pro is active until {d}.', payName: 'Full name', payPhone: 'Mobile phone', payWhy: 'Our payment provider, Grow, needs a name and an Israeli mobile number for every payment. The receipt goes to your account email.', payNameErr: 'Enter your first and last name.', payPhoneErr: 'Enter an Israeli mobile number, for example 0501234567.', payOff: 'Purchases are not open yet. Please try again soon.',
     payErr: 'Could not open the payment page. Please try again.', proPage: 'This page is part of Drive Play Pro', proPageS: 'Upgrade to unlock {n}.',
     toHome: 'Back to the home page', kidsPro: 'Ask a grown-up to upgrade the account.', proBadge: 'PRO'
   }
@@ -595,21 +595,45 @@ function proOffer() {
   const kids = CUR && CUR.prof && CUR.prof.kids;
   const on = isPro();
   return `<ul class="feats">${T('proFeat').map(f => `<li>${ic('check')}<span>${esc(f)}</span></li>`).join('')}</ul>
-    ${kids ? `<p class="hint" style="text-align:center">${T('kidsPro')}</p>` : `<div class="plans">
+    ${kids ? `<p class="hint" style="text-align:center">${T('kidsPro')}</p>` : `${payerForm()}<div class="plans">
       <div class="plan"><b>${T('planM')}</b><span class="price">${PRO_PRICE.m}</span><small>${T('perM')}</small><button class="btn ghost block sm" type="button" data-buy="m">${on ? T('extend') : T('buy')}</button></div>
       <div class="plan best"><span class="ribbon">${T('save2')}</span><b>${T('planY')}</b><span class="price">${PRO_PRICE.y}</span><small>${T('perY')}</small><button class="btn pri block sm" type="button" data-buy="y">${on ? T('extend') : T('buy')}</button></div>
     </div>
     <p class="hint" style="text-align:center">${T('payNote')}</p>
     <p class="status" id="payState" role="status" hidden></p>`}`;
 }
+/* Grow needs the payer's full name (two words at least) and an Israeli mobile number */
+const payerKey = uid => 'dpa_payer_' + uid;
+function payerForm() {
+  const sv = (CUR && CUR.uid && LS.get(payerKey(CUR.uid), null)) || {};
+  const nm = sv.n || (CUR && CUR.user && CUR.user.n) || '';
+  return `<div class="payer">
+      <label class="fld"><span>${T('payName')}</span><input class="inp" id="payName" type="text" autocomplete="name" maxlength="60" value="${esc(nm)}"></label>
+      <label class="fld"><span>${T('payPhone')}</span><input class="inp ltr" id="payPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="0501234567" value="${esc(sv.p || '')}"></label>
+      <p class="hint">${T('payWhy')}</p>
+    </div>`;
+}
+const cleanName = v => String(v || '').replace(/[^\p{L}\p{M}' -]/gu, ' ').replace(/\s+/g, ' ').trim();
+function cleanPhone(v) { let d = String(v || '').replace(/\D/g, ''); if (d.startsWith('972')) d = '0' + d.slice(3); return d; }
+function payerCheck() {
+  const ni = $('#payName'), pi = $('#payPhone'), ps = $('#payState');
+  const n = cleanName(ni && ni.value), p = cleanPhone(pi && pi.value);
+  const bad = (el, msg) => { if (ps) { ps.textContent = msg; ps.hidden = false; } if (el) { el.setAttribute('aria-invalid', 'true'); el.focus(); } return null; };
+  [ni, pi].forEach(el => el && el.removeAttribute('aria-invalid'));
+  if (n.split(' ').filter(w => w.replace(/[' -]/g, '').length >= 2).length < 2) return bad(ni, T('payNameErr'));
+  if (!/^05\d{8}$/.test(p)) return bad(pi, T('payPhoneErr'));
+  LS.set(payerKey(CUR.uid), { n, p });
+  return { n, p };
+}
 let payWatch = 0;
 async function buy(plan, btn) {
   if (!PAY_API) { toast(T('payOff')); return; }
+  const payer = payerCheck(); if (!payer) return;
   const w = window.open('', '_blank');   /* opened inside the click so it is not blocked */
   busy(btn, true);
   try {
     const tok = await idToken(CUR.uid);
-    const r = await fetch(PAY_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ a: 'checkout', plan, idToken: tok, lang: LANG }) });
+    const r = await fetch(PAY_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ a: 'checkout', plan, idToken: tok, name: payer.n, phone: payer.p, lang: LANG }) });
     const j = await r.json();
     if (!j || !j.url || !PAY_URL_OK.test(j.url)) throw new Error(j && j.err || 'pay');
     if (w && !w.closed) { try { w.opener = null; } catch (e) {} w.location.href = j.url; } else window.open(j.url, '_blank', 'noopener');

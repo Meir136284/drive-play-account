@@ -263,3 +263,7 @@ h2{font-size:1.15rem;font-weight:800;margin:0 0 4px}
 .prostat small{display:block;color:var(--muted)}
 .prostat:not(.on) .probadge{filter:grayscale(1);opacity:.6}
 @media (max-width:380px){.plans{grid-template-columns:1fr}}
+.payer{margin:0 0 14px}
+.payer .fld{margin-bottom:10px}
+.payer .hint{margin:2px 0 0;font-size:.8rem}
+.inp[aria-invalid=true]{border-color:#ff5c6c;box-shadow:0 0 0 3px rgba(255,92,108,.18)}
