@@ -217,8 +217,10 @@ const STR = {
 let LANG = 'he', EXTRA = null;
 const T = (k, v) => { let s = (EXTRA && EXTRA[k] != null ? EXTRA[k] : (STR[LANG] || STR.en)[k]); if (s == null) s = STR.he[k]; if (typeof s === 'string' && v) s = s.replace(/\{(\w+)\}/g, (m, x) => v[x] != null ? v[x] : m); return s; };
 function setLang(l) {
-  l = String(l || '').toLowerCase().split('-')[0];
-  LANG = l === 'he' || l === 'iw' ? 'he' : (l || 'he');
+  l = String(l || '').replace(/["']/g, '').toLowerCase().split('-')[0];
+  const nl = l === 'he' || l === 'iw' ? 'he' : (l || 'he');
+  if (nl !== LANG) EXTRA = null;
+  LANG = nl;
   document.documentElement.lang = LANG; document.documentElement.dir = T('dir') === 'ltr' && !['ar', 'fa', 'ur', 'yi'].includes(LANG) ? 'ltr' : 'rtl';
   if (LANG !== 'he' && LANG !== 'en') fetch('i18n/' + LANG + '.json', { cache: 'force-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (j) { EXTRA = j; if (VIEW.redraw) VIEW.redraw(); } }).catch(() => {});
 }
@@ -386,6 +388,8 @@ function sendEnter() {
   if (ENTERED) { SS.set('dpa_visit', { u: CUR.type === 'guest' ? 'guest' : CUR.uid, p: CUR.prof && CUR.prof.id }); reloadPage(); return; }
   ENTERED = true;
   const kv = CUR.kv || {};
+  /* once inside, the account screens use the same language as the site (Hebrew unless the profile chose another) */
+  if (CUR.type === 'acct') setLang(kv.dp_lang || 'he');
   post({ t: 'enter', kv, prof: profView(CUR.prof), acct: acctView(), pro: proView(), lang: kv.dp_lang || '', persist: DEVSTORE_OK });
   SS.set('dpa_visit', { u: CUR.type === 'guest' ? 'guest' : CUR.uid, p: CUR.prof && CUR.prof.id });
   hideAll(); ui(false);
@@ -404,6 +408,8 @@ function onSet(ch) {
     if (v !== null && (typeof v !== 'string' || v.length > MAX_VAL)) continue;
     if (v === null) delete CUR.kv[k]; else CUR.kv[k] = v;
     pendKV[k] = v;
+    /* the page changed its language: the account screens follow it */
+    if (k === 'dp_lang') setLang(v || 'he');
   }
   setKVCache(CUR.type === 'guest' ? 'guest' : CUR.uid, CUR.prof.id, CUR.kv);
   if (CUR.type !== 'acct') { pendKV = {}; return; }
