@@ -26,8 +26,10 @@ const PAY_API = '';
 /* Pro gating is off until payments are connected (PAY_API). Set to true to lock Pro pages. */
 const PRO_ENABLED = false;
 const PRO_PRICE = { m: '₪14.90', y: '₪119' };
-/* Pages that need Pro. A page can also ask for it by sending pro:1 in its init message. */
-const PRO_PAGES = /cine|ספרי|librar|ערוצ|channels|טלוויז|world.?tv|פלייליסט|playlist/i;
+/* Pages that need Pro. A page can also ask for it by sending pro:1 in its init message.
+   Only CineAI. The library, free watching, the TV channels and the YouTube playlists stay free for everyone
+   (YouTube does not allow charging to watch its embedded player). Selling CineAI needs a commercial licence from TMDB. */
+const PRO_PAGES = /cine/i;
 
 /* ---------- tiny helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -131,14 +133,14 @@ const STR = {
     errNotEnabled: 'ההתחברות בדרך הזו עוד לא הופעלה. אפשר להתחבר עם אימייל בינתיים.',
     errSdk: 'לא הצלחנו לטעון את שירות ההתחברות. בדקו את החיבור ונסו שוב.',
     viaProvider: 'מחובר דרך {p}', reauthQ: 'כדי למחוק, אשרו שוב את ההתחברות דרך {p} וכתבו את המילה "מחיקה".',
-    proName: 'Drive Play Pro', tPro: 'Drive Play Pro', proS: 'כל מה שבחינם, ועוד הרבה יותר.',
+    proName: 'Drive Play Pro', tPro: 'Drive Play Pro', proS: 'כל השאר באתר נשאר בחינם. Pro מוסיף את CineAI.',
     proOn: 'Pro פעיל', proOff: 'החשבון בגרסה החינמית', proUntil: 'פעיל עד {d}',
-    proFeat: ['CineAI – העוזר החכם להמלצות', 'ספריית הסרטים והסדרות של Drive Play', 'ערוצי טלוויזיה מכל העולם, בשידור חי', 'מרכז הפלייליסטים של YouTube', 'כל הפרופילים בחשבון נהנים מ-Pro'],
+    proFeat: ['CineAI – העוזר החכם להמלצות', 'כל הפרופילים בחשבון נהנים מ-Pro'],
     planM: 'חודש', planY: 'שנה', perM: 'לחודש', perY: 'לשנה', save2: 'חודשיים מתנה', buy: 'רכישה', extend: 'הארכה',
     payNote: 'תשלום מאובטח בכרטיס אשראי, Bit, Apple Pay או Google Pay. אין חיוב חוזר – מאריכים מתי שרוצים.',
     payOpen: 'פתחנו את דף התשלום בחלון חדש. אחרי התשלום Pro יופעל כאן אוטומטית.', payWait: 'מחכים לאישור התשלום…',
     payDone: 'התשלום התקבל! Drive Play Pro פעיל עד {d}.', payOff: 'הרכישה עוד לא נפתחה. נסו שוב בקרוב.',
-    payErr: 'לא הצלחנו לפתוח את דף התשלום. נסו שוב.', proPage: 'הדף הזה חלק מ-Drive Play Pro', proPageS: 'שדרגו כדי לפתוח את {n} ועוד הרבה דברים.',
+    payErr: 'לא הצלחנו לפתוח את דף התשלום. נסו שוב.', proPage: 'הדף הזה חלק מ-Drive Play Pro', proPageS: 'שדרגו כדי לפתוח את {n}.',
     toHome: 'חזרה לדף הבית', kidsPro: 'בקשו ממבוגר בבית לשדרג את החשבון.', proBadge: 'PRO'
   },
   en: {
@@ -201,14 +203,14 @@ const STR = {
     errNotEnabled: 'This sign-in method is not available yet. You can sign in with email meanwhile.',
     errSdk: 'Could not load the sign-in service. Check your connection and try again.',
     viaProvider: 'Signed in with {p}', reauthQ: 'To delete, confirm your sign-in with {p} again and type the word "DELETE".',
-    proName: 'Drive Play Pro', tPro: 'Drive Play Pro', proS: 'Everything that is free, and a lot more.',
+    proName: 'Drive Play Pro', tPro: 'Drive Play Pro', proS: 'Everything else on the site stays free. Pro adds CineAI.',
     proOn: 'Pro is active', proOff: 'Your account is on the free plan', proUntil: 'Active until {d}',
-    proFeat: ['CineAI – the smart recommendation assistant', 'The Drive Play movie and series library', 'Live TV channels from all over the world', 'The YouTube playlists center', 'Every profile in the account gets Pro'],
+    proFeat: ['CineAI – the smart recommendation assistant', 'Every profile in the account gets Pro'],
     planM: 'Month', planY: 'Year', perM: 'per month', perY: 'per year', save2: '2 months free', buy: 'Buy', extend: 'Extend',
     payNote: 'Secure payment by card, Bit, Apple Pay or Google Pay. No automatic renewal – extend whenever you like.',
     payOpen: 'The payment page opened in a new window. Pro turns on here automatically after you pay.', payWait: 'Waiting for the payment…',
     payDone: 'Payment received! Drive Play Pro is active until {d}.', payOff: 'Purchases are not open yet. Please try again soon.',
-    payErr: 'Could not open the payment page. Please try again.', proPage: 'This page is part of Drive Play Pro', proPageS: 'Upgrade to unlock {n} and much more.',
+    payErr: 'Could not open the payment page. Please try again.', proPage: 'This page is part of Drive Play Pro', proPageS: 'Upgrade to unlock {n}.',
     toHome: 'Back to the home page', kidsPro: 'Ask a grown-up to upgrade the account.', proBadge: 'PRO'
   }
 };
