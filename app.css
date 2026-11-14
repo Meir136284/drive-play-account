@@ -236,3 +236,30 @@ h2{font-size:1.15rem;font-weight:800;margin:0 0 4px}
   #center{padding:0}
 }
 @media (max-height:620px){.logo{width:110px;margin-bottom:6px}.who-h{margin-bottom:14px}}
+
+/* sign-in with Google / Apple / Facebook */
+.soc{gap:9px}
+.sbtn{justify-content:center;gap:10px;font-weight:700;border-color:var(--line2)}
+.sbtn .bm{width:20px;height:20px;flex:none}
+.sbtn.google{background:#fff;color:#1f1f1f}.sbtn.google:hover{background:#eef2f7}
+.sbtn.apple{background:#000;color:#fff;border-color:#333}.sbtn.apple:hover{background:#1a1a1a}
+.sbtn.facebook{background:#1877F2;color:#fff}.sbtn.facebook:hover{background:#166fe0}
+.sbtn .spin{border-color:rgba(127,127,127,.35);border-top-color:currentColor}
+
+/* Drive Play Pro */
+.probadge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-weight:800;font-size:.78rem;letter-spacing:.8px;color:#1b1300;background:linear-gradient(135deg,#ffd76a,#f5c518 50%,#ffb020);box-shadow:0 6px 18px rgba(245,197,24,.28)}
+.probadge .ic{width:15px;height:15px;fill:currentColor}
+.feats{list-style:none;padding:0;margin:0 0 16px;display:grid;gap:8px}
+.feats li{display:flex;gap:9px;align-items:flex-start;font-size:.92rem;color:#d6dfef}
+.feats .ic{width:18px;height:18px;flex:none;fill:#3DDC6B;margin-top:2px}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 10px}
+.plan{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 12px 12px;border:1px solid var(--line2);border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
+.plan.best{border-color:rgba(245,197,24,.6);background:rgba(245,197,24,.06)}
+.plan b{font-size:.95rem}
+.plan .price{font-size:1.5rem;font-weight:800;direction:ltr}
+.plan small{color:var(--muted);margin-bottom:8px}
+.ribbon{position:absolute;top:-10px;inset-inline:0;margin:auto;width:max-content;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:800;color:#1b1300;background:#f5c518}
+.prostat{display:flex;align-items:center;gap:12px}
+.prostat small{display:block;color:var(--muted)}
+.prostat:not(.on) .probadge{filter:grayscale(1);opacity:.6}
+@media (max-width:380px){.plans{grid-template-columns:1fr}}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; script-src 'sha256-3mVzt+oVBXPcTeBuvYcKCoCK5F8pE6EECQlmV/Ivifg='">
+<meta name="robots" content="noindex">
+<title>Drive Play Pro</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap">
+<style>
+:root{color-scheme:dark}
+html,body{margin:0;height:100%;background:#080a10;color:#EAF0FA;font-family:'Heebo',system-ui,sans-serif}
+body{display:flex;align-items:center;justify-content:center;padding:22px;background-image:radial-gradient(ellipse at 50% 38%,rgba(22,34,58,.75),rgba(8,10,16,.98) 70%)}
+.box{max-width:420px;text-align:center}
+img{width:110px;height:auto}
+h1{font-size:1.5rem;margin:10px 0 6px}
+p{color:#93A1BA;margin:0 0 6px}
+.c{display:none}
+</style>
+</head>
+<body>
+<div class="box">
+  <img src="logo.webp" alt="Drive Play" width="110" height="110">
+  <div id="ok"><h1>התשלום התקבל ✓</h1><p>Drive Play Pro יופעל בחשבון שלכם תוך כמה שניות.</p><p>אפשר לסגור את החלון הזה ולחזור ל-Drive Play.</p></div>
+  <div id="cancel" class="c"><h1>התשלום בוטל</h1><p>לא בוצע חיוב. אפשר לסגור את החלון ולנסות שוב מתי שרוצים.</p></div>
+</div>
+<script>if(/[?&]s=cancel/.test(location.search)){document.getElementById('ok').style.display='none';document.getElementById('cancel').style.display='block'}</script>
+</body>
+</html>
