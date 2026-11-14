@@ -22,7 +22,7 @@ const FB_VER = '10.12.2';
 const AUTH_DOMAIN = CFG.project + '.firebaseapp.com';
 const SOCIAL = ['google', 'apple', 'facebook'];
 /* Drive Play Pro. PAY_API is the address of the payments web app (server/Code.gs) once it is deployed. */
-const PAY_API = '';
+const PAY_API = 'https://script.google.com/macros/s/AKfycbz2NNQCeAG4gL6UERqDdiFD0Y7OxfrsnpTWuBeHNoaf6FH6ULprv84bN_VLYJPG-mRY/exec';
 /* Pro gating is off until payments are connected (PAY_API). Set to true to lock Pro pages. */
 const PRO_ENABLED = false;
 const PRO_PRICE = { m: '₪14.90', y: '₪119' };

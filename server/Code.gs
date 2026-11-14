@@ -212,7 +212,7 @@ function logSale_(order, sum, tx, until) {
 /* Firestore REST with the owner's permission */
 function fsUrl_(path) { return 'https://firestore.googleapis.com/v1/projects/' + prop_('FIREBASE_PROJECT') + '/databases/(default)/documents/' + path; }
 function fsFetch_(url, opt) {
-  opt = opt || {}; opt.muteHttpExceptions = true; opt.headers = { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() };
+  opt = opt || {}; opt.muteHttpExceptions = true; opt.headers = { Authorization: 'Bearer ' + ScriptApp.getOAuthToken(), 'x-goog-user-project': prop_('FIREBASE_PROJECT') };
   if (opt.payload) opt.contentType = 'application/json';
   const r = UrlFetchApp.fetch(url, opt), c = r.getResponseCode();
   if (c === 404) return null;

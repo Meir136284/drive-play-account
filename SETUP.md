@@ -71,3 +71,10 @@ Firestore Database → Rules → מדביקים את התוכן של `firestore.
 
 `₪14.90` לחודש, `₪119` לשנה. תשלום חד-פעמי בלי חיוב חוזר – Bit לא תומך בחיוב חוזר, וכך גם אין צורך בניהול ביטולים. אפשר להאריך מתי שרוצים, והזמן מצטבר.
 המחירים מוגדרים בשני מקומות: `PLANS` ב-`server/Code.gs` (מה שבאמת נגבה) ו-`PRO_PRICE` ב-`app.js` (מה שמוצג).
+
+## מצב נוכחי (14/11/2026)
+
+- שרת התשלומים פרוס: פרויקט Apps Script בשם `Drive Play – תשלומים` בחשבון mamimonanat@gmail.com, כתובת ה-Web app כבר נמצאת ב-`PAY_API`.
+- כבר מוגדרים: `FIREBASE_PROJECT`, `GROW_ENV=sandbox`, `RETURN_URL`, `WEB_APP_URL`. חסרים רק `GROW_USER_ID` ו-`GROW_PAGE_CODE` (ו-`GROW_API_KEY` אם Grow נותנת).
+- כללי Firestore עם `ent/` פורסמו.
+- `PRO_ENABLED` עדיין `false`: מפעילים אחרי בדיקה מוצלחת ב-sandbox של Grow ואחרי הסכם מסחרי עם TMDB.
