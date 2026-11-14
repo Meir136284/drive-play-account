@@ -1,28 +1,44 @@
 rules_version = '2';
-// Drive Play – Firestore security rules.
-// Paste into Firebase console → Firestore Database → Rules → Publish.
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Each account reads and writes only its own data (profiles, lists, stats, devices).
+    function signedIn(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function smallDoc(maxFields) {
+      return request.resource.data.size() <= maxFields;
+    }
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-      match /{sub=**} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+      // the account itself: only its owner, never listable
+      allow get, delete: if signedIn(uid);
+      allow create, update: if signedIn(uid) && smallDoc(20)
+        && (!('n' in request.resource.data) || (request.resource.data.n is string && request.resource.data.n.size() <= 40))
+        && (!('img' in request.resource.data) || (request.resource.data.img is string && request.resource.data.img.size() <= 70000))
+        && (!('P' in request.resource.data) || (request.resource.data.P is list && request.resource.data.P.size() <= 6))
+        && (!('L' in request.resource.data) || (request.resource.data.L is list && request.resource.data.L.size() <= 12));
+
+      // saved data of each profile (lists, settings, history, CineAI memory)
+      match /kv/{pid} {
+        allow read, delete: if signedIn(uid);
+        allow create, update: if signedIn(uid) && pid.size() <= 40 && smallDoc(4)
+          && (!('d' in request.resource.data) || request.resource.data.d is map);
+      }
+      // watching and browsing time
+      match /stats/{pid} {
+        allow read, delete: if signedIn(uid);
+        allow create, update: if signedIn(uid) && pid.size() <= 40 && smallDoc(12);
+      }
+      // signed-in devices
+      match /sessions/{sid} {
+        allow read, delete: if signedIn(uid);
+        allow create, update: if signedIn(uid) && sid.size() <= 40 && smallDoc(10);
       }
     }
-
-    // Drive Play Pro end date. Users can only read their own; only the payments server writes it.
+    // Drive Play Pro end date: the owner can read it, only the payments server writes it
     match /ent/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
+      allow get: if signedIn(uid);
     }
-
-    // Orders are kept by the payments server only.
-    match /orders/{id} {
-      allow read, write: if false;
-    }
-
+    // orders (orders/{id}) are kept by the payments server only: closed by the rule below
+    // everything else is closed
     match /{document=**} {
       allow read, write: if false;
     }
