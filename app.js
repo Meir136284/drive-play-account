@@ -20,7 +20,9 @@ const REQUIRE_ACCOUNT = true;
 /* Sign-in with Google / Facebook / Apple goes through Google's Firebase SDK, loaded only on the sign-in screens. */
 const FB_VER = '10.12.2';
 const AUTH_DOMAIN = CFG.project + '.firebaseapp.com';
-const SOCIAL = ['google', 'apple', 'facebook'];
+/* sign-in buttons. Only providers that are turned on in Firebase: add 'facebook' or 'apple' here after enabling them,
+   otherwise every visit sends a failing check for them */
+const SOCIAL = ['google'];
 /* Drive Play Pro. PAY_API is the address of the payments web app (server/Code.gs) once it is deployed. */
 const PAY_API = 'https://script.google.com/macros/s/AKfycbz2NNQCeAG4gL6UERqDdiFD0Y7OxfrsnpTWuBeHNoaf6FH6ULprv84bN_VLYJPG-mRY/exec';
 /* Pro gating is off until payments are connected (PAY_API). Set to true to lock Pro pages. */
@@ -332,7 +334,17 @@ async function fsReq(uid, method, path, body, qs, keep) {
     throw e;
   }
 }
-async function fsGet(uid, path) { try { const j = await fsReq(uid, 'GET', path); return decFields(j.fields || {}); } catch (e) { if (e.status === 404 || e.code === 'NOT_FOUND') return null; throw e; } }
+/* batchGet answers 200 with "missing" for a document that doesn't exist yet (a new account, a profile with
+   nothing saved, no Pro), so the browser console doesn't fill with 404 errors */
+async function fsGet(uid, path) {
+  const url = FS.replace(/\/documents\/$/, '/documents:batchGet');
+  const body = JSON.stringify({ documents: [DOCNAME(path)] });
+  const go = tok => jfetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body });
+  let j;
+  try { j = await go(await idToken(uid)); } catch (e) { if (e.status !== 401) throw e; await idToken(uid, true); j = await go(TOK[uid].id); }
+  const it = Array.isArray(j) ? j[0] : null;
+  return it && it.found ? decFields(it.found.fields || {}) : null;
+}
 async function fsPatch(uid, path, obj, mask, keep) {
   const qs = (mask || Object.keys(obj)).map(m => 'updateMask.fieldPaths=' + encodeURIComponent(fp(m))).join('&');
   return fsReq(uid, 'PATCH', path, { fields: encFields(obj) }, qs, keep);
@@ -586,7 +598,7 @@ const proView = () => ({ on: isPro(), until: PRO.until || 0 });
 const pageNeedsPro = () => PRO_ENABLED && !!(PAGE.pro || PRO_PAGES.test(PAGE.page + ' ' + PAGE.label));
 async function loadPro(uid, offline) {
   PRO = LS.get(proKey(uid), null) || { until: 0 };
-  if (offline) return PRO;
+  if (offline || !PRO_ENABLED) return PRO;   /* nothing to check while Pro is off */
   try { const e = await withTimeout(fsGet(uid, 'ent/' + uid), 5000); PRO = { until: (e && +e.until) || 0, plan: (e && e.plan) || '' }; LS.set(proKey(uid), PRO); } catch (x) {}
   return PRO;
 }
