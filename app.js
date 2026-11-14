@@ -15,6 +15,19 @@ const DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 const DEV_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const KEY_OK = /^(dp_|cineai_)[A-Za-z0-9_@.-]{1,60}$|^theme$/;
 const MAX_VAL = 300000;
+/* Everyone signs in: no guest mode. Set to false to bring back "continue without an account". */
+const REQUIRE_ACCOUNT = true;
+/* Sign-in with Google / Facebook / Apple goes through Google's Firebase SDK, loaded only on the sign-in screens. */
+const FB_VER = '10.12.2';
+const AUTH_DOMAIN = CFG.project + '.firebaseapp.com';
+const SOCIAL = ['google', 'apple', 'facebook'];
+/* Drive Play Pro. PAY_API is the address of the payments web app (server/Code.gs) once it is deployed. */
+const PAY_API = '';
+/* Pro gating is off until payments are connected (PAY_API). Set to true to lock Pro pages. */
+const PRO_ENABLED = false;
+const PRO_PRICE = { m: '₪14.90', y: '₪119' };
+/* Pages that need Pro. A page can also ask for it by sending pro:1 in its init message. */
+const PRO_PAGES = /cine|ספרי|librar|ערוצ|channels|טלוויז|world.?tv|פלייליסט|playlist/i;
 
 /* ---------- tiny helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -45,8 +58,15 @@ const P = (d) => ({
   dl: 'M11 3h2v9l3.3-3.3 1.4 1.4L12 15.8 6.3 10.1l1.4-1.4L11 12V3zM4 19h16v2H4z',
   trash: 'M9 3h6l1 2h4v2H4V5h4l1-2zM6 9h12l-1 12H7L6 9z',
   play: 'M8 5v14l11-7z',
-  mail: 'M2 5h20v14H2V5zm2 2v.5l8 5 8-5V7H4zm16 2.8l-8 5-8-5V17h16V9.8z'
+  mail: 'M2 5h20v14H2V5zm2 2v.5l8 5 8-5V7H4zm16 2.8l-8 5-8-5V17h16V9.8z',
+  crown: 'M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5L3 7zm2.4 14h13.2v2H5.4v-2z',
+  check: 'M9 16.2l-4.2-4.2-1.4 1.4L9 19 21 7l-1.4-1.4z'
 }[d]);
+const BRAND = {
+  google: '<svg class="bm" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>',
+  apple: '<svg class="bm" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.2 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4zM13.9 5c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>',
+  facebook: '<svg class="bm" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M24 12a12 12 0 10-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0024 12z"/></svg>'
+};
 const ic = (n, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${P(n)}"/></svg>`;
 
 /* ---------- words (Hebrew first, English for every other interface language) ---------- */
@@ -102,7 +122,24 @@ const STR = {
     offline: 'אין חיבור לשרת – משתמשים בנתונים השמורים במכשיר.', kidsLocked: 'בפרופיל ילדים אפשר רק להחליף פרופיל.',
     topOnly: 'מערכת החשבונות של Drive Play פועלת מתוך האתר.', toSite: 'מעבר לאתר', unknownDev: 'מכשיר לא מזוהה',
     stayHint: 'אפשר לסגור עם Esc', prof: 'פרופיל', you: 'אתם', pinSet: 'הקוד נשמר', welcomeNew: 'החשבון נוצר. ברוכים הבאים, {n}',
-    verifyNote: 'שלחנו מייל לאימות הכתובת. אפשר להמשיך לגלוש כבר עכשיו.'
+    verifyNote: 'שלחנו מייל לאימות הכתובת. אפשר להמשיך לגלוש כבר עכשיו.',
+    welcomeReq: 'כדי לצפות ב-Drive Play צריך חשבון. ההרשמה בחינם ולוקחת כמה שניות.',
+    withGoogle: 'המשך עם Google', withApple: 'המשך עם Apple', withFacebook: 'המשך עם Facebook', orEmail: 'או עם אימייל',
+    socialAgree: 'בהמשך אתם מסכימים ל<a href="{u}" target="_blank" rel="noopener">תנאי השימוש ולמדיניות הפרטיות</a>.',
+    errPopup: 'הדפדפן חסם את חלון ההתחברות. אפשרו חלונות קופצים לאתר ונסו שוב.',
+    errOtherMethod: 'כבר יש חשבון עם האימייל הזה, בדרך התחברות אחרת. התחברו בדרך שבה נרשמתם.',
+    errNotEnabled: 'ההתחברות בדרך הזו עוד לא הופעלה. אפשר להתחבר עם אימייל בינתיים.',
+    errSdk: 'לא הצלחנו לטעון את שירות ההתחברות. בדקו את החיבור ונסו שוב.',
+    viaProvider: 'מחובר דרך {p}', reauthQ: 'כדי למחוק, אשרו שוב את ההתחברות דרך {p} וכתבו את המילה "מחיקה".',
+    proName: 'Drive Play Pro', tPro: 'Drive Play Pro', proS: 'כל מה שבחינם, ועוד הרבה יותר.',
+    proOn: 'Pro פעיל', proOff: 'החשבון בגרסה החינמית', proUntil: 'פעיל עד {d}',
+    proFeat: ['CineAI – העוזר החכם להמלצות', 'ספריית הסרטים והסדרות של Drive Play', 'ערוצי טלוויזיה מכל העולם, בשידור חי', 'מרכז הפלייליסטים של YouTube', 'כל הפרופילים בחשבון נהנים מ-Pro'],
+    planM: 'חודש', planY: 'שנה', perM: 'לחודש', perY: 'לשנה', save2: 'חודשיים מתנה', buy: 'רכישה', extend: 'הארכה',
+    payNote: 'תשלום מאובטח בכרטיס אשראי, Bit, Apple Pay או Google Pay. אין חיוב חוזר – מאריכים מתי שרוצים.',
+    payOpen: 'פתחנו את דף התשלום בחלון חדש. אחרי התשלום Pro יופעל כאן אוטומטית.', payWait: 'מחכים לאישור התשלום…',
+    payDone: 'התשלום התקבל! Drive Play Pro פעיל עד {d}.', payOff: 'הרכישה עוד לא נפתחה. נסו שוב בקרוב.',
+    payErr: 'לא הצלחנו לפתוח את דף התשלום. נסו שוב.', proPage: 'הדף הזה חלק מ-Drive Play Pro', proPageS: 'שדרגו כדי לפתוח את {n} ועוד הרבה דברים.',
+    toHome: 'חזרה לדף הבית', kidsPro: 'בקשו ממבוגר בבית לשדרג את החשבון.', proBadge: 'PRO'
   },
   en: {
     dir: 'ltr', loading: 'Loading…', detecting: 'Checking your account…', hello: 'Hi, {n}', welcomeBack: 'Welcome back to Drive Play',
@@ -155,7 +192,24 @@ const STR = {
     offline: 'Server not reachable – using the data saved on this device.', kidsLocked: 'Kids profiles can only switch profiles.',
     topOnly: 'The Drive Play account system runs inside the site.', toSite: 'Go to the site', unknownDev: 'Unknown device',
     stayHint: 'Press Esc to close', prof: 'Profile', you: 'You', pinSet: 'Code saved', welcomeNew: 'Account created. Welcome, {n}',
-    verifyNote: 'We sent you an email to verify the address. You can keep browsing right away.'
+    verifyNote: 'We sent you an email to verify the address. You can keep browsing right away.',
+    welcomeReq: 'You need an account to watch Drive Play. Signing up is free and takes a few seconds.',
+    withGoogle: 'Continue with Google', withApple: 'Continue with Apple', withFacebook: 'Continue with Facebook', orEmail: 'or with email',
+    socialAgree: 'By continuing you agree to the <a href="{u}" target="_blank" rel="noopener">terms of use and privacy policy</a>.',
+    errPopup: 'Your browser blocked the sign-in window. Allow pop-ups for this site and try again.',
+    errOtherMethod: 'An account with this email already exists with a different sign-in method. Use the method you signed up with.',
+    errNotEnabled: 'This sign-in method is not available yet. You can sign in with email meanwhile.',
+    errSdk: 'Could not load the sign-in service. Check your connection and try again.',
+    viaProvider: 'Signed in with {p}', reauthQ: 'To delete, confirm your sign-in with {p} again and type the word "DELETE".',
+    proName: 'Drive Play Pro', tPro: 'Drive Play Pro', proS: 'Everything that is free, and a lot more.',
+    proOn: 'Pro is active', proOff: 'Your account is on the free plan', proUntil: 'Active until {d}',
+    proFeat: ['CineAI – the smart recommendation assistant', 'The Drive Play movie and series library', 'Live TV channels from all over the world', 'The YouTube playlists center', 'Every profile in the account gets Pro'],
+    planM: 'Month', planY: 'Year', perM: 'per month', perY: 'per year', save2: '2 months free', buy: 'Buy', extend: 'Extend',
+    payNote: 'Secure payment by card, Bit, Apple Pay or Google Pay. No automatic renewal – extend whenever you like.',
+    payOpen: 'The payment page opened in a new window. Pro turns on here automatically after you pay.', payWait: 'Waiting for the payment…',
+    payDone: 'Payment received! Drive Play Pro is active until {d}.', payOff: 'Purchases are not open yet. Please try again soon.',
+    payErr: 'Could not open the payment page. Please try again.', proPage: 'This page is part of Drive Play Pro', proPageS: 'Upgrade to unlock {n} and much more.',
+    toHome: 'Back to the home page', kidsPro: 'Ask a grown-up to upgrade the account.', proBadge: 'PRO'
   }
 };
 let LANG = 'he', EXTRA = null;
@@ -326,10 +380,11 @@ let PARENT = null, PAGE = { page: '', label: '' }, ENTERED = false;
 function post(msg) { if (PARENT) window.parent.postMessage(Object.assign({ dp: 1 }, msg), PARENT); }
 function ui(on) { post({ t: 'ui', on }); }
 function sendEnter() {
+  if (CUR && CUR.type === 'acct' && pageNeedsPro() && !isPro()) { paywall(); return; }
   if (ENTERED) { SS.set('dpa_visit', { u: CUR.type === 'guest' ? 'guest' : CUR.uid, p: CUR.prof && CUR.prof.id }); reloadPage(); return; }
   ENTERED = true;
   const kv = CUR.kv || {};
-  post({ t: 'enter', kv, prof: profView(CUR.prof), acct: acctView(), lang: kv.dp_lang || '', persist: DEVSTORE_OK });
+  post({ t: 'enter', kv, prof: profView(CUR.prof), acct: acctView(), pro: proView(), lang: kv.dp_lang || '', persist: DEVSTORE_OK });
   SS.set('dpa_visit', { u: CUR.type === 'guest' ? 'guest' : CUR.uid, p: CUR.prof && CUR.prof.id });
   hideAll(); ui(false);
 }
@@ -513,6 +568,85 @@ function wireEyes(root) {
 }
 const busy = (btn, on) => { if (!btn) return; btn.disabled = on; if (on) { btn.dataset.t = btn.innerHTML; btn.innerHTML = '<span class="spin" aria-hidden="true"></span>'; } else if (btn.dataset.t) btn.innerHTML = btn.dataset.t; };
 
+/* ---------- Drive Play Pro ----------
+   The Pro end date lives in ent/{uid}. Only the payments server can write it
+   (see firestore.rules); this frame only reads it. */
+let PRO = { until: 0 };
+const proKey = uid => 'dpa_pro_' + uid;
+const isPro = () => (PRO.until || 0) > now();
+const proView = () => ({ on: isPro(), until: PRO.until || 0 });
+const pageNeedsPro = () => PRO_ENABLED && !!(PAGE.pro || PRO_PAGES.test(PAGE.page + ' ' + PAGE.label));
+async function loadPro(uid, offline) {
+  PRO = LS.get(proKey(uid), null) || { until: 0 };
+  if (offline) return PRO;
+  try { const e = await withTimeout(fsGet(uid, 'ent/' + uid), 5000); PRO = { until: (e && +e.until) || 0, plan: (e && e.plan) || '' }; LS.set(proKey(uid), PRO); } catch (x) {}
+  return PRO;
+}
+const PAY_URL_OK = /^https:\/\/([a-z0-9-]+\.)*(meshulam\.co\.il|grow\.link|grow\.business)\//;
+function proOffer() {
+  const kids = CUR && CUR.prof && CUR.prof.kids;
+  const on = isPro();
+  return `<ul class="feats">${T('proFeat').map(f => `<li>${ic('check')}<span>${esc(f)}</span></li>`).join('')}</ul>
+    ${kids ? `<p class="hint" style="text-align:center">${T('kidsPro')}</p>` : `<div class="plans">
+      <div class="plan"><b>${T('planM')}</b><span class="price">${PRO_PRICE.m}</span><small>${T('perM')}</small><button class="btn ghost block sm" type="button" data-buy="m">${on ? T('extend') : T('buy')}</button></div>
+      <div class="plan best"><span class="ribbon">${T('save2')}</span><b>${T('planY')}</b><span class="price">${PRO_PRICE.y}</span><small>${T('perY')}</small><button class="btn pri block sm" type="button" data-buy="y">${on ? T('extend') : T('buy')}</button></div>
+    </div>
+    <p class="hint" style="text-align:center">${T('payNote')}</p>
+    <p class="status" id="payState" role="status" hidden></p>`}`;
+}
+let payWatch = 0;
+async function buy(plan, btn) {
+  if (!PAY_API) { toast(T('payOff')); return; }
+  const w = window.open('', '_blank');   /* opened inside the click so it is not blocked */
+  busy(btn, true);
+  try {
+    const tok = await idToken(CUR.uid);
+    const r = await fetch(PAY_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ a: 'checkout', plan, idToken: tok, lang: LANG }) });
+    const j = await r.json();
+    if (!j || !j.url || !PAY_URL_OK.test(j.url)) throw new Error(j && j.err || 'pay');
+    if (w && !w.closed) { try { w.opener = null; } catch (e) {} w.location.href = j.url; } else window.open(j.url, '_blank', 'noopener');
+    const ps = $('#payState'); if (ps) { ps.textContent = T('payOpen'); ps.hidden = false; }
+    watchPay();
+  } catch (x) { if (w) try { w.close(); } catch (e) {} toast(T('payErr')); }
+  busy(btn, false);
+}
+/* after the payment page opens, check every few seconds until the server turns Pro on */
+function watchPay() {
+  clearInterval(payWatch);
+  const uid = CUR.uid, before = PRO.until || 0, end = now() + 20 * 60000;
+  payWatch = setInterval(async () => {
+    if (!CUR || CUR.uid !== uid || now() > end) { clearInterval(payWatch); return; }
+    const ps = $('#payState'); if (ps && !ps.hidden) ps.textContent = T('payWait');
+    await loadPro(uid);
+    if ((PRO.until || 0) > before && isPro()) {
+      clearInterval(payWatch);
+      toast(T('payDone', { d: fmtDate(PRO.until) }));
+      post({ t: 'pro', pro: proView() });
+      if (VIEW.name === 'paywall') sendEnter(); else if (VIEW.name === 'center' && TAB === 'pro') drawTab();
+    }
+  }, 5000);
+}
+function paywall() {
+  VIEW.name = 'paywall'; VIEW.redraw = paywall;
+  const st = stage(`<img class="logo sm" src="logo.webp" alt="Drive Play" width="96" height="96">
+    <span class="probadge">${ic('crown')}${T('proBadge')}</span>
+    <h1>${T('proPage')}</h1><p class="sub">${esc(T('proPageS', { n: PAGE.label || T('proName') }))}</p>
+    <div class="card">${proOffer()}</div>
+    <p class="small mt" style="text-align:center"><a class="link" href="${SITE}" target="_top" rel="noopener">${T('toHome')}</a> · <button class="link" type="button" data-go="switch">${T('switchAcct')}</button></p>`);
+  st.onclick = e => {
+    const b = e.target.closest('[data-buy]'); if (b) { buy(b.dataset.buy, b); return; }
+    const g = e.target.closest('[data-go]'); if (g && g.dataset.go === 'switch') picker(CUR.user, {});
+  };
+}
+function tabPro(m) {
+  const on = isPro();
+  m.innerHTML = `<h2>${T('tPro')}</h2><p class="lead">${T('proS')}</p>
+    <div class="sec prostat ${on ? 'on' : ''}"><span class="probadge">${ic('crown')}${T('proBadge')}</span><div><b>${on ? T('proOn') : T('proOff')}</b>${on ? `<small>${esc(T('proUntil', { d: fmtDate(PRO.until) }))}</small>` : ''}</div></div>
+    <div class="sec">${proOffer()}</div>`;
+  m.onclick = e => { const b = e.target.closest('[data-buy]'); if (b) buy(b.dataset.buy, b); };
+  loadPro(CUR.uid).then(() => { if (VIEW.name === 'center' && TAB === 'pro' && isPro() !== on) drawTab(); });
+}
+
 /* ---------- entrance screens ---------- */
 function splash(msg) {
   VIEW.name = 'splash'; VIEW.redraw = null;
@@ -526,21 +660,27 @@ function welcome(note) {
   const saved = D.order.map(u => D.accts[u]).filter(Boolean);
   const st = stage(`<img class="logo sm rise" src="logo.webp" alt="Drive Play" width="96" height="96">
     <h1 class="rise d1">${T('welcomeT')}</h1>
-    <p class="sub rise d1">${T('welcomeS')}</p>
+    <p class="sub rise d1">${REQUIRE_ACCOUNT ? T('welcomeReq') : T('welcomeS')}</p>
     <div class="card rise d2">
       ${note ? `<div class="err" role="alert">${esc(note)}</div>` : ''}
-      ${saved.length ? `<p class="small muted" style="margin:0 0 8px">${T('savedHere')}</p><div class="accts">${saved.map(a => `<button class="acct" type="button" data-acct="${esc(a.uid)}">${avatar({ n: a.n || a.em, col: '#2F7BFF', img: a.img }, 'round')}<span class="who"><b>${esc(a.n || a.em)}</b><small>${esc(maskEmail(a.em))}</small></span><span class="tag ${a.rt ? '' : 'off'}">${a.rt ? T('connected') : T('needPw')}</span></button>`).join('')}</div><div class="sep">•</div>` : ''}
+      ${saved.length ? `<p class="small muted" style="margin:0 0 8px">${T('savedHere')}</p><div class="accts">${saved.map(a => `<button class="acct" type="button" data-acct="${esc(a.uid)}">${avatar({ n: a.n || a.em, col: '#2F7BFF', img: a.img }, 'round')}<span class="who"><b>${esc(a.n || a.em)}</b><small>${esc(maskEmail(a.em))}</small></span><span class="tag ${a.rt ? '' : 'off'}">${a.rt ? T('connected') : (a.pv && a.pv !== 'password' ? PNAME[a.pv] : T('needPw'))}</span></button>`).join('')}</div><div class="sep">•</div>` : ''}
+      <div class="err" id="wErr" role="alert" hidden></div>
+      ${socialButtons()}
+      <div class="sep">${T('orEmail')}</div>
       <div class="col">
         <button class="btn pri block" type="button" data-go="signup">${T('signup')}</button>
         <button class="btn ghost block" type="button" data-go="signin">${T('signin')}</button>
       </div>
-      <div class="mt" style="text-align:center"><button class="link" type="button" data-go="guest">${T('guest')}</button><p class="hint" style="text-align:center">${T('guestNote')}</p></div>
+      <p class="hint" style="text-align:center;margin-top:12px">${T('socialAgree', { u: PRIVACY_URL })}</p>
+      ${REQUIRE_ACCOUNT ? '' : `<div class="mt" style="text-align:center"><button class="link" type="button" data-go="guest">${T('guest')}</button><p class="hint" style="text-align:center">${T('guestNote')}</p></div>`}
     </div>`);
+  loadSdk().catch(() => {});
   st.onclick = e => {
+    const s = e.target.closest('[data-soc]'); if (s) { socialSignIn(s.dataset.soc, s, $('#wErr')); return; }
     const a = e.target.closest('[data-acct]');
-    if (a) { const ac = D.accts[a.dataset.acct]; if (ac && ac.rt) { D.cur = ac.uid; saveD(); startAccount(ac.uid, true); } else signin(ac && ac.em); return; }
+    if (a) { const ac = D.accts[a.dataset.acct]; if (ac && ac.rt) { D.cur = ac.uid; saveD(); startAccount(ac.uid, true); } else if (ac && ac.pv && ac.pv !== 'password') { const k = Object.keys(PID).find(x => PID[x] === ac.pv); socialSignIn(k, a, $('#wErr')); } else signin(ac && ac.em); return; }
     const g = e.target.closest('[data-go]'); if (!g) return;
-    if (g.dataset.go === 'signup') signup(); else if (g.dataset.go === 'signin') signin(); else enterGuest();
+    if (g.dataset.go === 'signup') signup(); else if (g.dataset.go === 'signin') signin(); else if (!REQUIRE_ACCOUNT) enterGuest();
   };
 }
 function formShell(title, sub, body) {
@@ -552,13 +692,15 @@ function signin(email) {
   VIEW.name = 'signin'; VIEW.redraw = null;
   const st = stage(formShell(T('signinT'), '', `
     <div class="err" id="fErr" role="alert" hidden></div>
-    <label class="fld"><span>${T('email')}</span><input class="inp ltr" type="email" id="fEm" autocomplete="username" inputmode="email" required value="${esc(email || '')}" ${email ? '' : 'autofocus'}></label>
+    ${email ? '' : socialButtons() + `<div class="sep">${T('orEmail')}</div>`}
+    <label class="fld"><span>${T('email')}</span><input class="inp ltr" type="email" id="fEm" autocomplete="username" inputmode="email" required value="${esc(email || '')}"></label>
     ${pwField('fPw', T('password'), 'current-password', email ? 'autofocus' : '')}
     <div class="row between" style="margin:-4px 0 14px"><button class="link" type="button" data-go="forgot">${T('forgot')}</button></div>
     <button class="btn pri block" type="submit">${T('doSignin')}</button>
     <p class="small muted mt" style="text-align:center">${T('noAcct')} <button class="link" type="button" data-go="signup">${T('createIt')}</button></p>`), { fx: false });
   wireEyes(st);
-  st.onclick = e => { const g = e.target.closest('[data-go]'); if (!g) return; if (g.dataset.go === 'welcome') welcome(); else if (g.dataset.go === 'signup') signup(); else forgot($('#fEm').value.trim()); };
+  loadSdk().catch(() => {});
+  st.onclick = e => { const so = e.target.closest('[data-soc]'); if (so) { socialSignIn(so.dataset.soc, so, $('#fErr')); return; } const g = e.target.closest('[data-go]'); if (!g) return; if (g.dataset.go === 'welcome') welcome(); else if (g.dataset.go === 'signup') signup(); else forgot($('#fEm').value.trim()); };
   $('form', st).onsubmit = async e => {
     e.preventDefault();
     const em = $('#fEm').value.trim(), pw = $('#fPw').value, er = $('#fErr'), btn = $('button[type=submit]', st);
@@ -569,7 +711,7 @@ function signin(email) {
     busy(btn, true);
     try {
       const j = await authCall('signInWithPassword', { email: em, password: pw, returnSecureToken: true });
-      brake.good(); const a = storeSession(j); D.cur = a.uid; saveD();
+      brake.good(); const a = storeSession(j, { pv: 'password' }); D.cur = a.uid; saveD();
       await startAccount(a.uid, true, { justIn: true });
     } catch (x) { if (/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND/.test(x.code)) brake.bad(); busy(btn, false); er.textContent = errMsg(x); er.hidden = false; }
   };
@@ -611,7 +753,7 @@ function signup() {
     busy(btn, true);
     try {
       const j = await authCall('signUp', { email: em, password: p1, returnSecureToken: true });
-      const a = storeSession(j, { n: nm }); D.cur = a.uid; saveD();
+      const a = storeSession(j, { n: nm, pv: 'password' }); D.cur = a.uid; saveD();
       authCall('update', { idToken: j.idToken, displayName: nm, returnSecureToken: false }).catch(() => {});
       authCall('sendOobCode', { requestType: 'VERIFY_EMAIL', idToken: j.idToken }).catch(() => {});
       const pid = 'p' + rid(8);
@@ -646,6 +788,72 @@ function forgot(email) {
   };
 }
 function loginEntry() { const d = devInfo(); return { at: now(), d: [d.os, d.br].filter(Boolean).join(' · ') || T('unknownDev'), k: d.kind }; }
+
+/* ---------- sign-in with Google / Apple / Facebook ----------
+   The Firebase SDK opens the provider's window and returns a normal Firebase
+   session, which is then kept exactly like an email sign-in (REST tokens).
+   The SDK is loaded ahead of time so the click opens the window at once. */
+const PNAME = { google: 'Google', apple: 'Apple', facebook: 'Facebook', 'google.com': 'Google', 'apple.com': 'Apple', 'facebook.com': 'Facebook', password: 'Email' };
+const PID = { google: 'google.com', apple: 'apple.com', facebook: 'facebook.com' };
+let FBP = null;
+function loadSdk() {
+  if (!FBP) FBP = Promise.all([import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`), import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth.js`)]).then(([A, M]) => {
+    const app = A.initializeApp({ apiKey: CFG.key, authDomain: AUTH_DOMAIN, projectId: CFG.project }, 'dp-social');
+    const auth = M.initializeAuth(app, { persistence: M.inMemoryPersistence, popupRedirectResolver: M.browserPopupRedirectResolver });
+    try { auth.languageCode = LANG; } catch (e) {}
+    return { auth, M };
+  }).catch(e => { FBP = null; throw e; });
+  return FBP;
+}
+function provider(M, k) {
+  if (k === 'google') { const p = new M.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' }); return p; }
+  if (k === 'facebook') { const p = new M.FacebookAuthProvider(); p.addScope('email'); return p; }
+  const p = new M.OAuthProvider('apple.com'); p.addScope('email'); p.addScope('name'); if (LANG) p.setCustomParameters({ locale: LANG === 'he' ? 'he_IL' : LANG }); return p;
+}
+function socialErr(e) {
+  const c = (e && e.code) || '';
+  if (/popup-closed|cancelled-popup|user-cancelled/.test(c)) return '';
+  if (/popup-blocked/.test(c)) return T('errPopup');
+  if (/account-exists-with-different-credential|credential-already-in-use|email-already-in-use/.test(c)) return T('errOtherMethod');
+  if (/operation-not-allowed|unauthorized-domain|invalid-oauth|configuration-not-found|admin-restricted/.test(c)) return T('errNotEnabled');
+  if (/network|internal-error/.test(c)) return T('errNet');
+  if (/user-disabled/.test(c)) return T('errDisabled');
+  if (/too-many-requests/.test(c)) return T('errMany');
+  return e && e.code ? T('errGeneric') : T('errSdk');
+}
+/* opens the provider's window and returns a session in the same shape as the REST sign-in */
+async function socialPopup(k) {
+  const { auth, M } = await loadSdk();
+  const res = await M.signInWithPopup(auth, provider(M, k));
+  const u = res.user, info = M.getAdditionalUserInfo(res) || {};
+  const j = { localId: u.uid, email: u.email || (u.providerData[0] && u.providerData[0].email) || '', idToken: await u.getIdToken(), refreshToken: u.refreshToken, expiresIn: 3600 };
+  const nm = String(u.displayName || (u.providerData[0] && u.providerData[0].displayName) || j.email.split('@')[0] || '').trim().slice(0, 30);
+  M.signOut(auth).catch(() => {});
+  return { j, nm, isNew: !!info.isNewUser };
+}
+async function socialSignIn(k, btn, er) {
+  if (er) er.hidden = true;
+  busy(btn, true);
+  try {
+    const { j, nm } = await socialPopup(k);
+    const a = storeSession(j, { n: nm, pv: PID[k] }); D.cur = a.uid; saveD();
+    let user = await fsGet(a.uid, 'users/' + a.uid).catch(() => null);
+    const isNew = !user;
+    if (isNew) {
+      const pid = 'p' + rid(8), g = D.guest || {};
+      user = { n: nm || 'Drive Play', img: '', c: now(), ep: 0, P: [{ id: pid, n: nm || 'Drive Play', col: g.col || PCOLS[0], kids: false, img: '' }], L: [loginEntry()], v: 1 };
+      await fsPatch(a.uid, 'users/' + a.uid, user);
+      cacheUser(a.uid, user);
+      const gkv = getKV('guest'); if (Object.keys(gkv).length) { await fsPatch(a.uid, 'users/' + a.uid + '/kv/' + pid, { d: gkv, u: now() }).catch(() => {}); setKVCache(a.uid, pid, gkv); LS.del('dpa_gkv'); }
+      D.prof[a.uid] = pid; saveD();
+    }
+    await startAccount(a.uid, true, { justIn: true, isNew });
+  } catch (x) {
+    busy(btn, false);
+    const m = socialErr(x); if (m && er) { er.textContent = m; er.hidden = false; }
+  }
+}
+const socialButtons = () => `<div class="col soc">${SOCIAL.map(k => `<button class="btn block sbtn ${k}" type="button" data-soc="${k}">${BRAND[k]}<span>${T('with' + k[0].toUpperCase() + k.slice(1))}</span></button>`).join('')}</div>`;
 
 /* who is watching */
 function picker(user, opts = {}) {
@@ -686,6 +894,7 @@ async function choose(p, opts = {}) {
   splash(T('entering'));
   CUR.kv = getKV(uid, p.id);
   try { CUR.kv = await withTimeout(fetchKV(uid, p.id), 5000); setKVCache(uid, p.id, CUR.kv); } catch (e) {}
+  await loadPro(uid);
   sendEnter();
 }
 function askPin(p) {
@@ -790,13 +999,14 @@ function center(tab) {
   if (tab === 'switch') { if (CUR.type === 'acct') { picker(CUR.user, { fromPage: true }); return; } tab = 'account'; }
   hideStage();
   TAB = tab || TAB || 'profiles';
+  if (!PRO_ENABLED && TAB === 'pro') TAB = 'profiles';
   if (CUR.type === 'guest' && !['account', 'stats', 'privacy'].includes(TAB)) TAB = 'account';
   VIEW.name = 'center'; VIEW.redraw = () => center(TAB);
   let c = $('#center'); if (!c) { c = document.createElement('div'); c.id = 'center'; document.body.appendChild(c); }
   c.hidden = false; ui(true);
   const g = CUR.type === 'guest'; const u = CUR.user || {}; const a = g ? null : D.accts[CUR.uid];
   const tabs = g ? [['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['privacy', 'shield', T('tPrivacy')]]
-    : [['profiles', 'people', T('tProfiles')], ['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['devices', 'device', T('tDevices')], ['privacy', 'shield', T('tPrivacy')]];
+    : [...(PRO_ENABLED ? [['pro', 'crown', T('tPro')]] : []), ['profiles', 'people', T('tProfiles')], ['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['devices', 'device', T('tDevices')], ['privacy', 'shield', T('tPrivacy')]];
   c.innerHTML = `<div class="panel" role="dialog" aria-modal="true" aria-label="${T('center')}">
     <nav class="side" role="tablist" aria-label="${T('center')}">
       <div class="me">${g ? avatar({ n: '?', col: '#475569' }, 'round') : avatar({ n: u.n, img: u.img, col: '#2F7BFF' }, 'round')}<div class="who"><b>${esc(g ? T('guestT') : u.n || '')}</b><small dir="ltr">${esc(g ? '' : (a && a.em) || '')}</small></div></div>
@@ -819,7 +1029,7 @@ function closeCenter() { hideCenter(); ui(false); }
 function drawTab() {
   const m = $('#cMain'); if (!m) return;
   m.scrollTop = 0;
-  ({ profiles: tabProfiles, account: tabAccount, stats: tabStats, devices: tabDevices, privacy: tabPrivacy })[TAB](m);
+  ({ pro: tabPro, profiles: tabProfiles, account: tabAccount, stats: tabStats, devices: tabDevices, privacy: tabPrivacy })[TAB](m);
 }
 function tabProfiles(m) {
   const list = CUR.user.P || [];
@@ -850,8 +1060,8 @@ function tabAccount(m) {
   m.innerHTML = `<h2>${T('tAccount')}</h2><p class="lead">${T('acctS')}</p>
     <div class="sec"><div class="photo-row">${avatar({ n: u.n, img: u.img, col: '#2F7BFF' }, 'lg round')}<div class="col" style="gap:6px;align-items:flex-start"><label class="btn ghost sm" style="cursor:pointer">${ic('cam')}${T('upload')}<input type="file" accept="image/*" id="aFile" class="sr"></label>${u.img ? `<button class="link small" type="button" data-x="noimg">${T('removePhoto')}</button>` : ''}</div></div>
       <label class="fld"><span>${T('acctName')}</span><div class="row"><input class="inp" id="aNm" maxlength="30" value="${esc(u.n || '')}"><button class="btn sm" type="button" data-x="name">${T('save')}</button></div></label>
-      <div class="fld"><span>${T('email')}</span><div class="row wrap"><span dir="ltr" style="font-weight:600">${esc(a.em || '')}</span><span class="chip" id="aVer">…</span><button class="link small" type="button" data-x="verify" hidden id="aVerB">${T('resend')}</button></div></div></div>
-    <div class="sec"><h3>${T('changePw')}</h3>
+      <div class="fld"><span>${T('email')}</span><div class="row wrap"><span dir="ltr" style="font-weight:600">${esc(a.em || '')}</span><span class="chip" id="aVer">…</span><span class="chip" id="aVia" hidden></span><button class="link small" type="button" data-x="verify" hidden id="aVerB">${T('resend')}</button></div></div></div>
+    <div class="sec" id="aPwSec" ${a.pv && a.pv !== 'password' ? 'hidden' : ''}><h3>${T('changePw')}</h3>
       <form id="aPwF" novalidate style="max-width:380px"><div class="err" id="aPwE" hidden></div><div class="ok" id="aPwO" hidden></div>
       <input type="text" autocomplete="username" value="${esc(a.em || '')}" hidden>
       ${pwField('aPw0', T('curPw'), 'current-password')}${pwField('aPw1', T('newPw'), 'new-password')}
@@ -864,7 +1074,7 @@ function tabAccount(m) {
       <button class="btn ghost sm" type="button" data-x="add">${ic('plus')}${T('addAcct')}</button></div></div>
     <div class="sec danger"><h3>${T('dangerT')}</h3><p class="d">${T('dangerS')}</p><button class="btn danger sm" type="button" data-x="del">${ic('trash')}${T('delAcct')}</button></div>`;
   wireEyes(m);
-  idToken(CUR.uid).then(t => authCall('lookup', { idToken: t })).then(j => { const v = j.users && j.users[0] && j.users[0].emailVerified; const ch = $('#aVer'); if (!ch) return; ch.textContent = v ? T('verified') : T('notVerified'); ch.className = 'chip ' + (v ? 'g' : 'y'); $('#aVerB').hidden = !!v; }).catch(() => { const ch = $('#aVer'); if (ch) ch.hidden = true; });
+  idToken(CUR.uid).then(t => authCall('lookup', { idToken: t })).then(j => { const us = j.users && j.users[0]; const v = us && us.emailVerified; const pvs = ((us && us.providerUserInfo) || []).map(x => x.providerId); if (pvs.length) { a.pvs = pvs; if (!a.pv) a.pv = pvs.includes('password') ? 'password' : pvs[0]; saveD(); const ps = $('#aPwSec'); if (ps) ps.hidden = !pvs.includes('password'); const sp = $('#aVia'); if (sp) { sp.textContent = T('viaProvider', { p: pvs.map(x => PNAME[x] || x).join(' + ') }); sp.hidden = false; } } const ch = $('#aVer'); if (!ch) return; ch.textContent = v ? T('verified') : T('notVerified'); ch.className = 'chip ' + (v ? 'g' : 'y'); $('#aVerB').hidden = !!v; }).catch(() => { const ch = $('#aVer'); if (ch) ch.hidden = true; });
   const p1 = $('#aPw1'); p1.addEventListener('input', () => { const r = pwRules(p1.value); $$('#aRq li').forEach((li, i) => li.classList.toggle('on', r[i])); });
   $('#aFile').addEventListener('change', async e => { try { const img = await readPhoto(e.target.files[0]); await saveUser(CUR.uid, { img }); toast(T('saved')); post({ t: 'acct', acct: acctView() }); drawTab(); } catch (x) { toast(x.message === 'img' ? T('imgBad') : errMsg(x)); } });
   $('#aPwF').onsubmit = async e => {
@@ -916,8 +1126,16 @@ async function signOutAll() {
 }
 async function deleteAccount() {
   const uid = CUR.uid, a = D.accts[uid];
-  const r = await ask(T('delAcctQ'), { title: T('delAcct'), yes: T('delete'), danger: true, pw: true, word: T('delWord'), wordLabel: T('delWord'),
-    check: async v => { try { const j = await authCall('signInWithPassword', { email: a.em, password: v.pw, returnSecureToken: true }); storeSession(j); return null; } catch (x) { return errMsg(x); } } });
+  const pwd = !a.pv || a.pv === 'password' || (a.pvs || []).includes('password');
+  const sk = pwd ? null : Object.keys(PID).find(x => PID[x] === a.pv);
+  if (sk) loadSdk().catch(() => {});
+  const r = await ask(sk ? T('reauthQ', { p: PNAME[sk] }) : T('delAcctQ'), { title: T('delAcct'), yes: T('delete'), danger: true, pw: !sk, word: T('delWord'), wordLabel: T('delWord'),
+    check: async v => {
+      try {
+        if (sk) { const { j } = await socialPopup(sk); if (j.localId !== uid) return T('errCreds'); storeSession(j); return null; }
+        const j = await authCall('signInWithPassword', { email: a.em, password: v.pw, returnSecureToken: true }); storeSession(j); return null;
+      } catch (x) { return sk ? (socialErr(x) || T('errGeneric')) : errMsg(x); }
+    } });
   if (!r) return;
   try {
     splash(T('loading'));
@@ -1060,6 +1278,7 @@ async function startAccount(uid, interactive, opts = {}) {
     stage(`<img class="logo float" src="logo.webp" alt="Drive Play" width="220" height="220"><h1 class="rise">${esc(T('hello', { n: p.n }))}</h1><p class="sub rise d1">${T('welcomeBack')}</p><div class="line" aria-hidden="true"><span></span></div>`, { focus: false });
   }
   try { CUR.kv = await withTimeout(fetchKV(uid, p.id), offline ? 1 : 5000); setKVCache(uid, p.id, CUR.kv); } catch (e) {}
+  await loadPro(uid, offline);
   if (greet) await sleep(700);
   sendEnter();
 }
@@ -1077,9 +1296,12 @@ async function quickEnter(visit) {
   if (!a || !a.rt || !user) return false;
   const p = (user.P || []).find(x => x.id === visit.p); if (!p) return false;
   CUR = { type: 'acct', uid, user, prof: p, kv: getKV(uid, p.id) };
+  PRO = LS.get(proKey(uid), null) || { until: 0 };
+  if (pageNeedsPro() && !isPro()) await loadPro(uid);
   sendEnter();
   /* refresh in the background; the page gets the newest data on its next load */
   try {
+    const was = isPro(); await loadPro(uid); if (isPro() !== was) post({ t: 'pro', pro: proView() });
     const [u, kv] = await Promise.all([fsGet(uid, 'users/' + uid), fetchKV(uid, p.id)]);
     if (u) { if ((u.ep || 0) > (a.ep || 0)) { await signOut(true); post({ t: 'reload' }); return; } cacheUser(uid, u); CUR.user = u; const np = (u.P || []).find(x => x.id === p.id); if (!np) { SS.del('dpa_visit'); post({ t: 'reload' }); return; } CUR.prof = np; post({ t: 'acct', acct: acctView(), prof: profView(np) }); }
     const merged = Object.assign({}, kv, pendKV); for (const k in pendKV) if (pendKV[k] === null) delete merged[k];
@@ -1090,6 +1312,7 @@ async function quickEnter(visit) {
 }
 async function begin() {
   const visit = SS.get('dpa_visit', null);
+  if (REQUIRE_ACCOUNT && D.cur === 'guest') { D.cur = null; saveD(); }
   if (visit && (visit.u === 'guest' ? D.cur === 'guest' : D.cur === visit.u)) { if ((await quickEnter(visit)) !== false) return; }
   if (D.cur === 'guest') {
     /* guests: first page of each visit offers to sign in, later pages go straight in */
@@ -1110,7 +1333,7 @@ addEventListener('message', e => {
   switch (m.t) {
     case 'init':
       if (started) return; started = true;
-      PAGE = { page: String(m.page || '').slice(0, 30), label: String(m.label || '').slice(0, 80) };
+      PAGE = { page: String(m.page || '').slice(0, 30), label: String(m.label || '').slice(0, 80), pro: m.pro === 1 || m.pro === true };
       if (m.still) document.documentElement.classList.add('still');
       { const gl = (D.cur && D.cur !== 'guest' && D.prof[D.cur] && getKV(D.cur, D.prof[D.cur]).dp_lang) || getKV('guest').dp_lang || m.lang || navigator.language || 'he'; setLang(gl); }
       begin();
