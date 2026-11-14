@@ -23,6 +23,8 @@ const AUTH_DOMAIN = CFG.project + '.firebaseapp.com';
 const SOCIAL = ['google', 'apple', 'facebook'];
 /* Drive Play Pro. PAY_API is the address of the payments web app (server/Code.gs) once it is deployed. */
 const PAY_API = '';
+/* Pro gating is off until payments are connected (PAY_API). Set to true to lock Pro pages. */
+const PRO_ENABLED = false;
 const PRO_PRICE = { m: '₪14.90', y: '₪119' };
 /* Pages that need Pro. A page can also ask for it by sending pro:1 in its init message. */
 const PRO_PAGES = /cine|ספרי|librar|ערוצ|channels|טלוויז|world.?tv|פלייליסט|playlist/i;
@@ -573,7 +575,7 @@ let PRO = { until: 0 };
 const proKey = uid => 'dpa_pro_' + uid;
 const isPro = () => (PRO.until || 0) > now();
 const proView = () => ({ on: isPro(), until: PRO.until || 0 });
-const pageNeedsPro = () => !!(PAGE.pro || PRO_PAGES.test(PAGE.page + ' ' + PAGE.label));
+const pageNeedsPro = () => PRO_ENABLED && !!(PAGE.pro || PRO_PAGES.test(PAGE.page + ' ' + PAGE.label));
 async function loadPro(uid, offline) {
   PRO = LS.get(proKey(uid), null) || { until: 0 };
   if (offline) return PRO;
@@ -997,13 +999,14 @@ function center(tab) {
   if (tab === 'switch') { if (CUR.type === 'acct') { picker(CUR.user, { fromPage: true }); return; } tab = 'account'; }
   hideStage();
   TAB = tab || TAB || 'profiles';
+  if (!PRO_ENABLED && TAB === 'pro') TAB = 'profiles';
   if (CUR.type === 'guest' && !['account', 'stats', 'privacy'].includes(TAB)) TAB = 'account';
   VIEW.name = 'center'; VIEW.redraw = () => center(TAB);
   let c = $('#center'); if (!c) { c = document.createElement('div'); c.id = 'center'; document.body.appendChild(c); }
   c.hidden = false; ui(true);
   const g = CUR.type === 'guest'; const u = CUR.user || {}; const a = g ? null : D.accts[CUR.uid];
   const tabs = g ? [['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['privacy', 'shield', T('tPrivacy')]]
-    : [['pro', 'crown', T('tPro')], ['profiles', 'people', T('tProfiles')], ['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['devices', 'device', T('tDevices')], ['privacy', 'shield', T('tPrivacy')]];
+    : [...(PRO_ENABLED ? [['pro', 'crown', T('tPro')]] : []), ['profiles', 'people', T('tProfiles')], ['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['devices', 'device', T('tDevices')], ['privacy', 'shield', T('tPrivacy')]];
   c.innerHTML = `<div class="panel" role="dialog" aria-modal="true" aria-label="${T('center')}">
     <nav class="side" role="tablist" aria-label="${T('center')}">
       <div class="me">${g ? avatar({ n: '?', col: '#475569' }, 'round') : avatar({ n: u.n, img: u.img, col: '#2F7BFF' }, 'round')}<div class="who"><b>${esc(g ? T('guestT') : u.n || '')}</b><small dir="ltr">${esc(g ? '' : (a && a.em) || '')}</small></div></div>
