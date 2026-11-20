@@ -150,7 +150,7 @@ const STR = {
     blkL: 'כותרים חסומים', blkNone: 'אין כותרים חסומים', unblk: 'הסרת החסימה', blkT: 'חסימת "{n}"', blkS: 'בחרו באילו פרופילים הכותר לא יוצג. אפשר להסיר את החסימה בכל רגע מ"בקרת הורים" בחשבון.', blkDone: 'בקרת ההורים נשמרה',
     ppT: 'קוד הורים', ppOn: 'קוד ההורים פעיל. כדי לשנות סיווג, הורדות או חסימות צריך להזין אותו.', ppOff: 'אין קוד הורים. כל מי שנכנס לפרופיל רגיל יכול לשנות את ההגדרות.', ppSet: 'בחירת קוד הורים', ppChange: 'שינוי הקוד', ppDel: 'ביטול הקוד',
     ppAsk: 'הזינו את קוד ההורים', ppAskS: 'קוד בן 4 ספרות שנבחר בחשבון', ppNew: 'קוד חדש בן 4 ספרות', ppAgain: 'הקוד שוב, לאימות', ppMismatch: 'הקודים לא זהים. נסו שוב.', ppForgot: 'שכחתי את הקוד', ppForgotQ: 'כדי לאפס את קוד ההורים, הזינו את סיסמת החשבון.', ppReset: 'קוד ההורים בוטל. אפשר לבחור קוד חדש.',
-    parNote: 'ההגבלות חלות בכל הדפים של Drive Play שמציגים סרטים וסדרות, בכל מכשיר שמחובר לחשבון.', ageShort: '{a}+', kidsLvl: 'פרופיל ילדים', okBtn: 'אישור'
+    parNote: 'ההגבלות חלות בדף הצפייה החופשית של Drive Play, בכל מכשיר שמחובר לחשבון.', ageShort: '{a}+', kidsLvl: 'פרופיל ילדים', okBtn: 'אישור'
   },
   en: {
     dir: 'ltr', loading: 'Loading…', detecting: 'Checking your account…', hello: 'Hi, {n}', welcomeBack: 'Welcome back to Drive Play',
@@ -227,7 +227,7 @@ const STR = {
     blkL: 'Blocked titles', blkNone: 'No blocked titles', unblk: 'Unblock', blkT: 'Block "{n}"', blkS: 'Choose the profiles that should not see this title. You can unblock it any time from Parental controls in your account.', blkDone: 'Parental controls saved',
     ppT: 'Parents\' code', ppOn: 'The parents\' code is on. Changing ratings, downloads or blocks asks for it.', ppOff: 'No parents\' code. Anyone in a regular profile can change these settings.', ppSet: 'Choose a parents\' code', ppChange: 'Change code', ppDel: 'Turn off the code',
     ppAsk: 'Enter the parents\' code', ppAskS: 'The 4-digit code chosen in the account', ppNew: 'New 4-digit code', ppAgain: 'The code again, to confirm', ppMismatch: 'The codes do not match. Try again.', ppForgot: 'I forgot the code', ppForgotQ: 'To reset the parents\' code, enter the account password.', ppReset: 'The parents\' code was removed. You can choose a new one.',
-    parNote: 'The limits apply on every Drive Play page that shows movies and series, on every device signed in to the account.', ageShort: '{a}+', kidsLvl: 'Kids profile', okBtn: 'OK'
+    parNote: 'The limits apply on the Drive Play free-watch page, on every device signed in to the account.', ageShort: '{a}+', kidsLvl: 'Kids profile', okBtn: 'OK'
   }
 };
 let LANG = 'he', EXTRA = null;
