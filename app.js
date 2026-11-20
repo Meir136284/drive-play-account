@@ -1586,7 +1586,8 @@ if (DEV) window.__dpa = { get CUR() { return CUR; }, saveUser, rid, fsList, fsDe
 let started = false;
 addEventListener('message', e => {
   if (e.source !== window.parent) return;
-  const ok = PROD_ORIGIN.test(e.origin) || (DEV && DEV_ORIGIN.test(e.origin));
+  /* Google Sites embeds, or the standalone site on this same address (meir136284.github.io/drive-play/) */
+  const ok = PROD_ORIGIN.test(e.origin) || e.origin === location.origin || (DEV && DEV_ORIGIN.test(e.origin));
   if (!ok) return;
   const m = e.data; if (!m || m.dp !== 1 || typeof m.t !== 'string') return;
   if (!PARENT) PARENT = e.origin; else if (PARENT !== e.origin) return;
