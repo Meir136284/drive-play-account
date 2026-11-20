@@ -143,7 +143,14 @@ const STR = {
     payOpen: 'פתחנו את דף התשלום בחלון חדש. אחרי התשלום Pro יופעל כאן אוטומטית.', payWait: 'מחכים לאישור התשלום…',
     payDone: 'התשלום התקבל. Drive Play Pro פעיל עד {d}.', payName: 'שם מלא', payPhone: 'טלפון נייד', payWhy: 'חברת הסליקה Grow מבקשת שם וטלפון נייד לכל תשלום, והקבלה נשלחת לאימייל של החשבון.', payNameErr: 'כתבו שם פרטי ושם משפחה.', payPhoneErr: 'כתבו מספר נייד ישראלי, למשל 0501234567.', payOff: 'הרכישה עוד לא נפתחה. נסו שוב בקרוב.',
     payErr: 'לא הצלחנו לפתוח את דף התשלום. נסו שוב.', proPage: 'הדף הזה חלק מ-Drive Play Pro', proPageS: 'שדרגו כדי לפתוח את {n}.',
-    toHome: 'חזרה לדף הבית', kidsPro: 'בקשו ממבוגר בבית לשדרג את החשבון.', proBadge: 'PRO'
+    toHome: 'חזרה לדף הבית', kidsPro: 'בקשו ממבוגר בבית לשדרג את החשבון.', proBadge: 'PRO',
+    tParental: 'בקרת הורים', parS: 'לכל פרופיל אפשר לקבוע סיווג צפייה לפי גיל, לחסום כותרים מסוימים ולהגביל הורדות. קוד הורים מגן על השינויים.',
+    ageT: 'סיווג צפייה', ageS: 'כותרים עם סיווג גבוה יותר לא יוצגו בפרופיל הזה', ageAuto: 'לפי סוג הפרופיל', age0: 'גיל הרך', age7: 'ילדים – 7 ומעלה', age12: 'גיל 12 ומעלה', age14: 'גיל 14 ומעלה', age16: 'גיל 16 ומעלה', age18: 'ללא הגבלת גיל',
+    dlT: 'הורדות בחודש', dlOff: 'ללא הורדות', dlN: 'עד {n}', dlAll: 'ללא הגבלה',
+    blkL: 'כותרים חסומים', blkNone: 'אין כותרים חסומים', unblk: 'הסרת החסימה', blkT: 'חסימת "{n}"', blkS: 'בחרו באילו פרופילים הכותר לא יוצג. אפשר להסיר את החסימה בכל רגע מ"בקרת הורים" בחשבון.', blkDone: 'בקרת ההורים נשמרה',
+    ppT: 'קוד הורים', ppOn: 'קוד ההורים פעיל. כדי לשנות סיווג, הורדות או חסימות צריך להזין אותו.', ppOff: 'אין קוד הורים. כל מי שנכנס לפרופיל רגיל יכול לשנות את ההגדרות.', ppSet: 'בחירת קוד הורים', ppChange: 'שינוי הקוד', ppDel: 'ביטול הקוד',
+    ppAsk: 'הזינו את קוד ההורים', ppAskS: 'קוד בן 4 ספרות שנבחר בחשבון', ppNew: 'קוד חדש בן 4 ספרות', ppAgain: 'הקוד שוב, לאימות', ppMismatch: 'הקודים לא זהים. נסו שוב.', ppForgot: 'שכחתי את הקוד', ppForgotQ: 'כדי לאפס את קוד ההורים, הזינו את סיסמת החשבון.', ppReset: 'קוד ההורים בוטל. אפשר לבחור קוד חדש.',
+    parNote: 'ההגבלות חלות בכל הדפים של Drive Play שמציגים סרטים וסדרות, בכל מכשיר שמחובר לחשבון.', ageShort: '{a}+', kidsLvl: 'פרופיל ילדים', okBtn: 'אישור'
   },
   en: {
     dir: 'ltr', loading: 'Loading…', detecting: 'Checking your account…', hello: 'Hi, {n}', welcomeBack: 'Welcome back to Drive Play',
@@ -213,7 +220,14 @@ const STR = {
     payOpen: 'The payment page opened in a new window. Pro turns on here automatically after you pay.', payWait: 'Waiting for the payment…',
     payDone: 'Payment received. Drive Play Pro is active until {d}.', payName: 'Full name', payPhone: 'Mobile phone', payWhy: 'Our payment provider, Grow, needs a name and an Israeli mobile number for every payment. The receipt goes to your account email.', payNameErr: 'Enter your first and last name.', payPhoneErr: 'Enter an Israeli mobile number, for example 0501234567.', payOff: 'Purchases are not open yet. Please try again soon.',
     payErr: 'Could not open the payment page. Please try again.', proPage: 'This page is part of Drive Play Pro', proPageS: 'Upgrade to unlock {n}.',
-    toHome: 'Back to the home page', kidsPro: 'Ask a grown-up to upgrade the account.', proBadge: 'PRO'
+    toHome: 'Back to the home page', kidsPro: 'Ask a grown-up to upgrade the account.', proBadge: 'PRO',
+    tParental: 'Parental controls', parS: 'Set an age rating for each profile, block specific titles and limit downloads. A parents\' code protects the changes.',
+    ageT: 'Age rating', ageS: 'Titles rated higher are hidden in this profile', ageAuto: 'By profile type', age0: 'Little kids', age7: 'Kids – 7 and up', age12: '12 and up', age14: '14 and up', age16: '16 and up', age18: 'No age limit',
+    dlT: 'Downloads per month', dlOff: 'No downloads', dlN: 'Up to {n}', dlAll: 'Unlimited',
+    blkL: 'Blocked titles', blkNone: 'No blocked titles', unblk: 'Unblock', blkT: 'Block "{n}"', blkS: 'Choose the profiles that should not see this title. You can unblock it any time from Parental controls in your account.', blkDone: 'Parental controls saved',
+    ppT: 'Parents\' code', ppOn: 'The parents\' code is on. Changing ratings, downloads or blocks asks for it.', ppOff: 'No parents\' code. Anyone in a regular profile can change these settings.', ppSet: 'Choose a parents\' code', ppChange: 'Change code', ppDel: 'Turn off the code',
+    ppAsk: 'Enter the parents\' code', ppAskS: 'The 4-digit code chosen in the account', ppNew: 'New 4-digit code', ppAgain: 'The code again, to confirm', ppMismatch: 'The codes do not match. Try again.', ppForgot: 'I forgot the code', ppForgotQ: 'To reset the parents\' code, enter the account password.', ppReset: 'The parents\' code was removed. You can choose a new one.',
+    parNote: 'The limits apply on every Drive Play page that shows movies and series, on every device signed in to the account.', ageShort: '{a}+', kidsLvl: 'Kids profile', okBtn: 'OK'
   }
 };
 let LANG = 'he', EXTRA = null;
@@ -366,7 +380,13 @@ const devInfo = () => {
   const kind = /iPhone|Android.+Mobile|Mobile/.test(u) ? 'phone' : /iPad|Android|Tablet/.test(u) ? 'tablet' : 'desktop';
   return { os, br, kind };
 };
-function profView(p) { return p ? { id: p.id, n: p.n, col: p.col, kids: !!p.kids, img: p.img || '', lock: !!p.pin } : null; }
+function profView(p) {
+  if (!p) return null;
+  const v = { id: p.id, n: p.n, col: p.col, kids: !!p.kids, img: p.img || '', lock: !!p.pin, blk: profBlk(p) };
+  if (p.age != null && p.age !== '') v.age = +p.age;
+  if (p.dl != null && p.dl !== '') v.dl = +p.dl;
+  return v;
+}
 function acctView() {
   if (!CUR) return { type: 'none' };
   if (CUR.type === 'guest') return { type: 'guest', n: T('guest') };
@@ -999,7 +1019,7 @@ async function readPhoto(file) {
 function editProfile(p, back) {
   const isNew = !p;
   const user = CUR.user; const list = user.P || [];
-  const ed = { n: p ? p.n : '', col: p ? p.col : PCOLS[list.length % PCOLS.length], kids: p ? !!p.kids : false, img: p ? p.img || '' : '', pin: p ? p.pin || '' : '', newPin: null };
+  const ed = { n: p ? p.n : '', col: p ? p.col : PCOLS[list.length % PCOLS.length], kids: p ? !!p.kids : false, img: p ? p.img || '' : '', pin: p ? p.pin || '' : '', newPin: null, age: p && p.age != null && p.age !== '' ? String(+p.age) : '', dl: p && p.dl != null && p.dl !== '' ? String(+p.dl) : '' };
   const m = modal(`<h2>${isNew ? T('profNew') : T('profEdit')}</h2><div style="height:12px"></div>
     <div class="photo-row"><span id="eAv">${avatar({ n: ed.n || '?', col: ed.col, img: ed.img }, 'lg')}</span>
       <div class="col" style="gap:6px;align-items:flex-start"><label class="btn ghost sm" style="cursor:pointer">${ic('cam')}${T('upload')}<input type="file" accept="image/*" id="eFile" class="sr"></label>
@@ -1007,6 +1027,8 @@ function editProfile(p, back) {
     <label class="fld"><span>${T('profName')}</span><input class="inp" id="eNm" maxlength="20" value="${esc(ed.n)}" autofocus></label>
     <div class="fld"><span>${T('color')}</span><div class="sw" id="eSw">${PCOLS.map(c => `<button type="button" style="--c:${c}" data-c="${c}" aria-label="${c}" aria-pressed="${c === ed.col}"></button>`).join('')}</div></div>
     <div class="tg"><span><b>${T('kidsT')}</b><small>${T('kidsS')}</small></span><span class="sw-t"><input type="checkbox" id="eKids" ${ed.kids ? 'checked' : ''}><i></i></span></div>
+    <div class="parg mt"><label class="fld"><span>${T('ageT')}</span><select class="inp" id="eAge">${[['', T('ageAuto')], ...AGES.map(a => [String(a), T('age' + a)])].map(([v, n]) => `<option value="${v}" ${v === ed.age ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
+      <label class="fld"><span>${T('dlT')}</span><select class="inp" id="eDl">${[['', T('ageAuto')], ...DLIMS.map(d => [String(d), dlLbl(d)])].map(([v, n]) => `<option value="${v}" ${v === ed.dl ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label></div>
     <div class="tg"><span><b>${T('pinOn')}</b><small>${T('pinOnS')}</small></span><span class="sw-t"><input type="checkbox" id="ePinOn" ${ed.pin ? 'checked' : ''}><i></i></span></div>
     <div id="ePinBox" hidden><div class="pin">${[0, 1, 2, 3].map(i => `<input inputmode="numeric" maxlength="1" aria-label="${i + 1}">`).join('')}</div></div>
     <div class="err" id="eErr" hidden></div>
@@ -1024,6 +1046,7 @@ function editProfile(p, back) {
     const b = e.target.closest('[data-a]'); if (!b) return;
     if (b.dataset.a === 'no') { closeModal(); if (back) back(); return; }
     if (b.dataset.a === 'del') {
+      if (!(await parPinOver(m))) return;
       closeModal();
       const ok = await ask(T('delProfQ', { n: p.n }), { title: T('delProf'), yes: T('delete'), danger: true }); if (!ok) { if (back) back(); return; }
       const P2 = list.filter(x => x.id !== p.id);
@@ -1039,19 +1062,176 @@ function editProfile(p, back) {
     if ($('#ePinOn', m).checked) {
       if ((code || !pin) && !/^\d{4}$/.test(code)) { $('#ePinBox', m).hidden = false; $('#eErr', m).textContent = T('pinS', { n }); $('#eErr', m).hidden = false; pinIns[0].focus(); return; }
     } else pin = '';
+    const ageV = $('#eAge', m).value, dlV = $('#eDl', m).value, kidsV = $('#eKids', m).checked;
+    /* new profiles and changes to kids mode, age rating or downloads need the parents' code (when one is set) */
+    if ((isNew || kidsV !== ed.kids || ageV !== ed.age || dlV !== ed.dl) && !(await parPinOver(m))) return;
     busy(b, true);
     const id = p ? p.id : 'p' + rid(8);
     if ($('#ePinOn', m).checked && code) pin = await pinHash(CUR.uid, id, code);
-    const np = { id, n: n.slice(0, 20), col: ed.col, kids: $('#eKids', m).checked, img: ed.img || '', pin: pin || '' };
+    const np = Object.assign({}, p || {}, { id, n: n.slice(0, 20), col: ed.col, kids: kidsV, img: ed.img || '', pin: pin || '' });
+    if (ageV === '') delete np.age; else np.age = +ageV;
+    if (dlV === '') delete np.dl; else np.dl = +dlV;
+    if (p && p.blk) np.blk = profBlk(p);
     const P2 = p ? list.map(x => x.id === id ? np : x) : [...list, np];
     try {
       await saveUser(CUR.uid, { P: P2 });
       closeModal(); toast(T('saved'));
-      const affectsPage = ENTERED && CUR.prof && CUR.prof.id === id && (np.kids !== !!CUR.prof.kids || np.n !== CUR.prof.n || np.img !== (CUR.prof.img || '') || np.col !== CUR.prof.col);
+      const affectsPage = ENTERED && CUR.prof && CUR.prof.id === id;
       if (CUR.prof && CUR.prof.id === id) CUR.prof = np;
       if (affectsPage) { post({ t: 'prof', prof: profView(np) }); if (np.kids !== !!(p && p.kids)) { reloadPage(); return; } }
       if (back) back();
     } catch (x) { busy(b, false); $('#eErr', m).textContent = errMsg(x); $('#eErr', m).hidden = false; }
+  });
+}
+
+/* ---------- parental controls: age rating, blocked titles and downloads for each profile ----------
+   Stored on each profile in users/{uid}.P (age, blk, dl). The parents' code (pp) is a hash on the
+   account itself, separate from the per-profile entry codes. */
+const AGES = [0, 7, 12, 14, 16, 18], DLIMS = [0, 5, 10, 25, -1];
+const numOr = (v, d) => (v != null && v !== '' && !isNaN(+v)) ? +v : d;
+const profAge = p => numOr(p && p.age, p && p.kids ? 12 : 18);
+const profDl = p => numOr(p && p.dl, p && p.kids ? 5 : -1);
+function profBlk(p) { return ((p && p.blk) || []).filter(x => x && typeof x.id === 'string').map(x => ({ id: x.id.slice(0, 80), n: String(x.n || '').slice(0, 80) })).slice(-100); }
+const dlLbl = d => d < 0 ? T('dlAll') : d === 0 ? T('dlOff') : T('dlN', { n: d });
+async function ppHash(uid, pin) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('dp-pp:' + uid + ':' + pin)); return Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join(''); }
+let PP_OK = 0;                                    /* the code stays open for 10 minutes in this window */
+const ppNeeded = () => !!(CUR && CUR.user && CUR.user.pp) && !(PP_OK && now() - PP_OK < 600000);
+const pinRow = (id, auto) => `<div class="pin" id="${id}">${[0, 1, 2, 3].map(i => `<input inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="${i + 1}" ${auto && !i ? 'autofocus' : ''}>`).join('')}</div>`;
+function wirePin(box, onFull) {
+  const ins = $$('input', box);
+  ins.forEach((inp, i) => {
+    inp.addEventListener('input', () => { inp.value = inp.value.replace(/\D/g, '').slice(-1); if (inp.value && i < 3) ins[i + 1].focus(); const c = ins.map(x => x.value).join(''); if (c.length === 4 && onFull) onFull(c); });
+    inp.addEventListener('keydown', e => { if (e.key === 'Backspace' && !inp.value && i) ins[i - 1].focus(); });
+  });
+  return { code: () => ins.map(x => x.value).join(''), clear: () => { ins.forEach(x => { x.value = ''; }); ins[0].focus(); } };
+}
+/* re-enter the account password (or the sign-in provider) */
+async function reauth(msg) {
+  const uid = CUR.uid, a = D.accts[uid];
+  const pwd = !a.pv || a.pv === 'password' || (a.pvs || []).includes('password');
+  const sk = pwd ? null : Object.keys(PID).find(x => PID[x] === a.pv);
+  if (sk) loadSdk().catch(() => {});
+  const r = await ask(sk ? T('reauthQ', { p: PNAME[sk] }) : msg, { title: T('ppT'), yes: T('okBtn'), pw: !sk,
+    check: async v => {
+      try {
+        if (sk) { const { j } = await socialPopup(sk); if (j.localId !== uid) return T('errCreds'); storeSession(j); return null; }
+        const j = await authCall('signInWithPassword', { email: a.em, password: v.pw, returnSecureToken: true }); storeSession(j); return null;
+      } catch (x) { return sk ? (socialErr(x) || T('errGeneric')) : errMsg(x); }
+    } });
+  return !!r;
+}
+/* resolves true when there is no parents' code or the right code was entered */
+function askParPin() {
+  if (!ppNeeded()) return Promise.resolve(true);
+  return new Promise(done => {
+    let fin = false, obs = null;
+    const res = v => { if (fin) return; fin = true; if (obs) obs.disconnect(); done(v); };
+    const m = modal(`<h2 style="text-align:center">${T('ppAsk')}</h2><p class="muted" style="text-align:center;margin:4px 0 0">${T('ppAskS')}</p>
+      ${pinRow('ppIn', true)}<div class="err" id="ppErr" hidden style="text-align:center"></div>
+      <div class="row between wrap"><button class="link small" type="button" data-a="forgot">${T('ppForgot')}</button><button class="btn ghost" type="button" data-a="no">${T('cancel')}</button></div>`);
+    const pin = wirePin($('#ppIn', m), async code => {
+      const w = brake.wait(); if (w) { $('#ppErr', m).textContent = T('errLock', { s: w }); $('#ppErr', m).hidden = false; pin.clear(); return; }
+      if ((await ppHash(CUR.uid, code)) === CUR.user.pp) { PP_OK = now(); brake.good(); res(true); closeModal(); }
+      else { brake.bad(); $('#ppErr', m).textContent = T('pinBad'); $('#ppErr', m).hidden = false; pin.clear(); }
+    });
+    m.addEventListener('click', async e => {
+      const b = e.target.closest('[data-a]'); if (!b) return;
+      if (b.dataset.a === 'no') { res(false); closeModal(); return; }
+      if (b.dataset.a === 'forgot') {
+        if (obs) obs.disconnect();
+        closeModal();
+        if (!(await reauth(T('ppForgotQ')))) { res(false); return; }
+        try { await saveUser(CUR.uid, { pp: '' }); PP_OK = now(); toast(T('ppReset')); res(true); } catch (x) { toast(errMsg(x)); res(false); }
+      }
+    });
+    obs = new MutationObserver(() => { if (!document.body.contains(m)) res(false); });
+    obs.observe(document.body, { childList: true });
+  });
+}
+/* the parents' code window sits over another window: take that one away and bring it back after */
+async function parPinOver(m) { if (!ppNeeded()) return true; m.remove(); const ok = await askParPin(); closeModal(); document.body.appendChild(m); return ok; }
+async function setParPin() {
+  if (CUR.user.pp && !(await askParPin())) return;
+  const m = modal(`<h2>${T('ppSet')}</h2><p class="muted" style="margin:4px 0 0">${T('parS')}</p>
+    <div class="fld mt"><span>${T('ppNew')}</span>${pinRow('pp1', true)}</div><div class="fld"><span>${T('ppAgain')}</span>${pinRow('pp2')}</div>
+    <div class="err" id="ppErr" hidden></div>
+    <div class="row end wrap"><button class="btn ghost" type="button" data-a="no">${T('cancel')}</button><button class="btn pri" type="button" data-a="ok">${T('save')}</button></div>`);
+  const a1 = wirePin($('#pp1', m), () => $$('#pp2 input', m)[0].focus()), a2 = wirePin($('#pp2', m));
+  m.addEventListener('click', async e => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    if (b.dataset.a === 'no') { closeModal(); return; }
+    const c1 = a1.code(), c2 = a2.code(), er = $('#ppErr', m);
+    if (!/^\d{4}$/.test(c1)) { er.textContent = T('ppNew'); er.hidden = false; a1.clear(); return; }
+    if (c1 !== c2) { er.textContent = T('ppMismatch'); er.hidden = false; a2.clear(); return; }
+    busy(b, true);
+    try { await saveUser(CUR.uid, { pp: await ppHash(CUR.uid, c1) }); PP_OK = now(); closeModal(); toast(T('saved')); if (TAB === 'parental') drawTab(); }
+    catch (x) { busy(b, false); er.textContent = errMsg(x); er.hidden = false; }
+  });
+}
+/* write the changed profiles and tell the page when the current profile changed */
+async function saveProfs(P2) {
+  await saveUser(CUR.uid, { P: P2 });
+  if (CUR.prof) { const np = P2.find(x => x.id === CUR.prof.id); if (np) { CUR.prof = np; if (ENTERED) post({ t: 'prof', prof: profView(np) }); } }
+}
+function tabParental(m) {
+  const list = CUR.user.P || [], pp = !!CUR.user.pp;
+  m.innerHTML = `<h2>${T('tParental')}</h2><p class="lead">${T('parS')}</p>
+    <div class="sec"><h3>${ic('lock')} ${T('ppT')}</h3><p class="d">${pp ? T('ppOn') : T('ppOff')}</p>
+      <div class="row wrap"><button class="btn ${pp ? 'ghost' : 'pri'} sm" type="button" data-x="ppset">${ic('key')}${pp ? T('ppChange') : T('ppSet')}</button>${pp ? `<button class="btn danger sm" type="button" data-x="ppdel">${T('ppDel')}</button>` : ''}</div></div>
+    ${list.map(p => { const bl = profBlk(p), ag = p.age != null && p.age !== '' ? String(+p.age) : '', dl = p.dl != null && p.dl !== '' ? String(+p.dl) : ''; return `<div class="sec parp" data-pp="${esc(p.id)}">
+      <div class="row parh">${avatar(p)}<b>${esc(p.n)}</b>${p.kids ? `<span class="chip y">${T('kidsLvl')}</span>` : ''}${CUR.prof && CUR.prof.id === p.id ? `<span class="chip">${T('current')}</span>` : ''}</div>
+      <div class="parg"><label class="fld"><span>${T('ageT')}</span><select class="inp" data-age>${[['', T('ageAuto') + ' · ' + T('age' + profAge({ kids: p.kids }))], ...AGES.map(a => [String(a), T('age' + a)])].map(([v, n]) => `<option value="${v}" ${v === ag ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
+        <label class="fld"><span>${T('dlT')}</span><select class="inp" data-dl>${[['', T('ageAuto') + ' · ' + dlLbl(profDl({ kids: p.kids }))], ...DLIMS.map(d => [String(d), dlLbl(d)])].map(([v, n]) => `<option value="${v}" ${v === dl ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label></div>
+      <div class="fld"><span>${T('blkL')}</span>${bl.length ? `<div class="blks">${bl.map(x => `<span class="blk"><b>${esc(x.n || x.id)}</b><button type="button" data-unblk="${esc(x.id)}" aria-label="${T('unblk')}">${ic('close')}</button></span>`).join('')}</div>` : `<small class="muted">${T('blkNone')}</small>`}</div>
+    </div>`; }).join('')}
+    <p class="muted small">${T('parNote')}</p>`;
+  const update = async (pid, fn, revert) => {
+    if (!(await askParPin())) { if (revert) revert(); return; }
+    const P2 = (CUR.user.P || []).map(x => x.id === pid ? fn(Object.assign({}, x)) : x);
+    try { await saveProfs(P2); toast(T('saved')); } catch (x) { toast(errMsg(x)); }
+    drawTab();
+  };
+  m.onchange = e => {
+    const sel = e.target.closest('select'); const box = e.target.closest('[data-pp]'); if (!sel || !box) return;
+    const key = sel.hasAttribute('data-age') ? 'age' : 'dl', v = sel.value, p = list.find(x => x.id === box.dataset.pp);
+    const before = p && p[key] != null && p[key] !== '' ? String(+p[key]) : '';
+    update(box.dataset.pp, x => { if (v === '') delete x[key]; else x[key] = +v; return x; }, () => { sel.value = before; });
+  };
+  m.onclick = e => {
+    const x = e.target.closest('[data-x]');
+    if (x && x.dataset.x === 'ppset') { setParPin(); return; }
+    if (x && x.dataset.x === 'ppdel') { (async () => { if (!(await askParPin())) return; try { await saveUser(CUR.uid, { pp: '' }); toast(T('saved')); } catch (er) { toast(errMsg(er)); } drawTab(); })(); return; }
+    const u = e.target.closest('[data-unblk]'); const box = e.target.closest('[data-pp]');
+    if (u && box) update(box.dataset.pp, p => { p.blk = profBlk(p).filter(b => b.id !== u.dataset.unblk); return p; });
+  };
+}
+/* the page asked to block a title: choose the profiles */
+async function blockFlow(raw) {
+  let d = null; try { d = JSON.parse(raw); } catch (e) {}
+  if (!d || typeof d.id !== 'string' || !d.id || d.id.length > 80) return;
+  const id = d.id, n = String(d.n || id).slice(0, 80);
+  center('parental');
+  if (!$('#center') || $('#center').hidden) return;
+  const list = CUR.user.P || [];
+  const was = new Set(list.filter(p => profBlk(p).some(x => x.id === id)).map(p => p.id));
+  const pre = was.size ? was : new Set(list.filter(p => p.kids || profAge(p) < 18).map(p => p.id));
+  const m = modal(`<h2>${esc(T('blkT', { n }))}</h2><p class="muted" style="margin:6px 0 10px">${T('blkS')}</p>
+    <div class="blkps">${list.map(p => `<label class="tg"><span class="row">${avatar(p)}<b>${esc(p.n)}</b>${p.kids ? `<span class="chip y">${T('kidsLvl')}</span>` : ''}</span><span class="sw-t"><input type="checkbox" data-bp="${esc(p.id)}" ${pre.has(p.id) ? 'checked' : ''}><i></i></span></label>`).join('')}</div>
+    <div class="err" id="bErr" hidden></div>
+    <div class="row end wrap mt"><button class="btn ghost" type="button" data-a="no">${T('cancel')}</button><button class="btn pri" type="button" data-a="ok">${T('save')}</button></div>`);
+  m.addEventListener('click', async e => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    if (b.dataset.a === 'no') { closeModal(); closeCenter(); return; }
+    const on = new Set($$('[data-bp]', m).filter(c => c.checked).map(c => c.dataset.bp));
+    /* lifting a block needs the parents' code; adding one does not */
+    if ([...was].some(pid => !on.has(pid)) && !(await parPinOver(m))) return;
+    busy(b, true);
+    const P2 = (CUR.user.P || []).map(p => {
+      const has = profBlk(p).some(x => x.id === id); if (has === on.has(p.id)) return p;
+      const q = Object.assign({}, p); const l = profBlk(p).filter(x => x.id !== id); if (on.has(p.id)) l.push({ id, n }); q.blk = l.slice(-100); return q;
+    });
+    try { await saveProfs(P2); closeModal(); drawTab(); toast(T('blkDone')); }
+    catch (x) { busy(b, false); $('#bErr', m).textContent = errMsg(x); $('#bErr', m).hidden = false; }
   });
 }
 
@@ -1064,13 +1244,14 @@ function center(tab) {
   hideStage();
   TAB = tab || TAB || 'profiles';
   if (!PRO_ENABLED && TAB === 'pro') TAB = 'profiles';
+  if (!['pro', 'profiles', 'parental', 'account', 'stats', 'devices', 'privacy'].includes(TAB)) TAB = 'profiles';
   if (CUR.type === 'guest' && !['account', 'stats', 'privacy'].includes(TAB)) TAB = 'account';
   VIEW.name = 'center'; VIEW.redraw = () => center(TAB);
   let c = $('#center'); if (!c) { c = document.createElement('div'); c.id = 'center'; document.body.appendChild(c); }
   c.hidden = false; ui(true);
   const g = CUR.type === 'guest'; const u = CUR.user || {}; const a = g ? null : D.accts[CUR.uid];
   const tabs = g ? [['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['privacy', 'shield', T('tPrivacy')]]
-    : [...(PRO_ENABLED ? [['pro', 'crown', T('tPro')]] : []), ['profiles', 'people', T('tProfiles')], ['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['devices', 'device', T('tDevices')], ['privacy', 'shield', T('tPrivacy')]];
+    : [...(PRO_ENABLED ? [['pro', 'crown', T('tPro')]] : []), ['profiles', 'people', T('tProfiles')], ['parental', 'lock', T('tParental')], ['account', 'user', T('tAccount')], ['stats', 'chart', T('tStats')], ['devices', 'device', T('tDevices')], ['privacy', 'shield', T('tPrivacy')]];
   c.innerHTML = `<div class="panel" role="dialog" aria-modal="true" aria-label="${T('center')}">
     <nav class="side" role="tablist" aria-label="${T('center')}">
       <div class="me">${g ? avatar({ n: '?', col: '#475569' }, 'round') : avatar({ n: u.n, img: u.img, col: '#2F7BFF' }, 'round')}<div class="who"><b>${esc(g ? T('guestT') : u.n || '')}</b><small dir="ltr">${esc(g ? '' : (a && a.em) || '')}</small></div></div>
@@ -1093,12 +1274,12 @@ function closeCenter() { hideCenter(); ui(false); }
 function drawTab() {
   const m = $('#cMain'); if (!m) return;
   m.scrollTop = 0;
-  ({ pro: tabPro, profiles: tabProfiles, account: tabAccount, stats: tabStats, devices: tabDevices, privacy: tabPrivacy })[TAB](m);
+  ({ pro: tabPro, profiles: tabProfiles, parental: tabParental, account: tabAccount, stats: tabStats, devices: tabDevices, privacy: tabPrivacy })[TAB](m);
 }
 function tabProfiles(m) {
   const list = CUR.user.P || [];
   m.innerHTML = `<h2>${T('tProfiles')}</h2><p class="lead">${T('profilesS')}</p>
-    <div class="mprofs">${list.map(p => `<button class="mprof ${CUR.prof && p.id === CUR.prof.id ? 'cur' : ''}" type="button" data-pid="${esc(p.id)}">${avatar(p)}<b>${esc(p.n)}</b><small>${CUR.prof && p.id === CUR.prof.id ? T('current') : [p.kids ? T('kids') : '', p.pin ? T('pinOn') : ''].filter(Boolean).join(' · ') || '&nbsp;'}</small></button>`).join('')}
+    <div class="mprofs">${list.map(p => `<button class="mprof ${CUR.prof && p.id === CUR.prof.id ? 'cur' : ''}" type="button" data-pid="${esc(p.id)}">${avatar(p)}<b>${esc(p.n)}</b><small>${CUR.prof && p.id === CUR.prof.id ? T('current') : [p.kids ? T('kids') : '', p.age != null && p.age !== '' && +p.age < 18 ? T('ageShort', { a: +p.age }) : '', p.pin ? T('pinOn') : ''].filter(Boolean).join(' · ') || '&nbsp;'}</small></button>`).join('')}
       ${list.length < MAX_PROFILES ? `<button class="mprof" type="button" data-pid="+"><span class="av" style="background:rgba(255,255,255,.05);border:2px dashed rgba(255,255,255,.3)">+</span><b>${T('newProf')}</b><small>&nbsp;</small></button>` : ''}</div>
     <div class="row wrap mt2"><button class="btn ghost sm" type="button" data-x="switch">${ic('swap')}${T('switchTo')}</button></div>`;
   m.onclick = e => {
@@ -1386,6 +1567,9 @@ async function begin() {
   splash(T('loading')); await sleep(250); welcome();
 }
 
+/* local test hook (only on localhost) */
+if (DEV) window.__dpa = { get CUR() { return CUR; }, saveUser, rid, fsList, fsDel, authCall, idToken, ppOpen(v) { PP_OK = v; } };
+
 /* ---------- messages from the page ---------- */
 let started = false;
 addEventListener('message', e => {
@@ -1404,7 +1588,7 @@ addEventListener('message', e => {
       break;
     case 'set': onSet(m.ch); break;
     case 'stat': onStat(m); break;
-    case 'open': if (ENTERED) center(String(m.view || '')); break;
+    case 'open': if (ENTERED) { const v = String(m.view || '').slice(0, 300); if (v.startsWith('block:')) blockFlow(v.slice(6)); else center(v); } break;
     case 'flush': flushAll(true); break;
   }
 });
