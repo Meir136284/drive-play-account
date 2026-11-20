@@ -38,6 +38,55 @@ service cloud.firestore {
       allow get: if signedIn(uid);
     }
     // orders (orders/{id}) are kept by the payments server only: closed by the rule below
+    function authed() {
+      return request.auth != null;
+    }
+    function str(v, n) {
+      return v is string && v.size() <= n;
+    }
+    function d() {
+      return request.resource.data;
+    }
+
+    // watch together: a room that one signed-in viewer (the host) controls; viewers who know its code can read it
+    match /rooms/{rid} {
+      allow get: if authed();
+      allow create: if authed() && rid.size() >= 8 && rid.size() <= 20 && d().h == request.auth.uid
+        && d().keys().hasOnly(['h', 'n', 'it', 'v', 'si', 'ei', 't', 'p', 'ti', 'at', 'x'])
+        && str(d().n, 30) && str(d().it, 80) && str(d().v, 300) && str(d().ti, 80) && d().si is int && d().ei is int && d().t is number && d().p is bool;
+      allow update: if authed() && resource.data.h == request.auth.uid && d().h == resource.data.h
+        && d().keys().hasOnly(['h', 'n', 'it', 'v', 'si', 'ei', 't', 'p', 'ti', 'at', 'x'])
+        && str(d().it, 80) && str(d().v, 300) && str(d().ti, 80) && d().si is int && d().ei is int && d().t is number && d().p is bool;
+      allow delete: if authed() && resource.data.h == request.auth.uid;
+    }
+    // shared lists: readable by signed-in viewers who know the code, changed only by their owner
+    match /pub/{lid} {
+      allow get: if authed();
+      allow create: if authed() && lid.size() >= 8 && lid.size() <= 20 && d().o == request.auth.uid
+        && d().keys().hasOnly(['o', 'n', 't', 'ids', 'at']) && str(d().n, 30) && str(d().t, 60) && d().ids is list && d().ids.size() <= 200;
+      allow update: if authed() && resource.data.o == request.auth.uid && d().o == resource.data.o
+        && d().keys().hasOnly(['o', 'n', 't', 'ids', 'at']) && str(d().n, 30) && str(d().t, 60) && d().ids is list && d().ids.size() <= 200;
+      allow delete: if authed() && resource.data.o == request.auth.uid;
+    }
+    // community star ratings: one number per viewer and title, no name; the page reads only the average
+    match /rt/{item}/u/{uid} {
+      allow read: if authed();
+      allow create, update: if signedIn(uid) && item.size() <= 400 && d().keys().hasOnly(['s', 'at']) && d().s is int && d().s >= 1 && d().s <= 5;
+      allow delete: if signedIn(uid);
+    }
+    // daily quiz table: one result per viewer and day, under the profile name; cannot be changed afterwards
+    match /qz/{day}/u/{uid} {
+      allow read: if authed();
+      allow create: if signedIn(uid) && day.matches('^[0-9]{8}$') && d().keys().hasOnly(['n', 's', 'at'])
+        && str(d().n, 30) && d().s is int && d().s >= 0 && d().s <= 5;
+      allow delete: if signedIn(uid);
+    }
+    // signing in a TV with a code: an encrypted hand-over that only the screen showing the code can find and read,
+    // read once and deleted by that screen
+    match /pair/{pid} {
+      allow get, delete: if pid.size() == 32;
+      allow create: if authed() && pid.size() == 32 && d().keys().hasOnly(['c', 'iv', 'at']) && str(d().c, 6000) && str(d().iv, 40);
+    }
     // everything else is closed
     match /{document=**} {
       allow read, write: if false;

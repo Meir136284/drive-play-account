@@ -27,6 +27,9 @@ const SOCIAL = ['google'];
 const PAY_API = 'https://script.google.com/macros/s/AKfycbz2NNQCeAG4gL6UERqDdiFD0Y7OxfrsnpTWuBeHNoaf6FH6ULprv84bN_VLYJPG-mRY/exec';
 /* Pro gating is off until payments are connected (PAY_API). Set to true to lock Pro pages. */
 const PRO_ENABLED = false;
+/* shared features (watch together, shared lists, community ratings, quiz table, TV sign-in by code):
+   switch on only after the matching rules are published in firestore.rules */
+const SOCIAL_ON = false;
 const PRO_PRICE = { m: '₪14.90', y: '₪119' };
 /* Pages that need Pro. A page can also ask for it by sending pro:1 in its init message.
    Only CineAI. The library, free watching, the TV channels and the YouTube playlists stay free for everyone
@@ -101,6 +104,11 @@ const STR = {
     pinOn: 'נעילה בקוד', pinOnS: 'קוד בן 4 ספרות לפני הכניסה לפרופיל', setPin: 'בחירת קוד', save: 'שמירה', cancel: 'ביטול',
     delProf: 'מחיקת הפרופיל', delProfQ: 'למחוק את הפרופיל "{n}" וכל מה שנשמר בו?', delete: 'מחיקה',
     imgBad: 'לא הצלחנו לקרוא את התמונה. נסו קובץ אחר.',
+    tvT: 'כניסה עם הטלפון', tvS: 'בטלפון או במחשב שכבר מחוברים ל-Drive Play פותחים את החשבון, נכנסים ל"מכשירים" ומקלידים את הקוד הזה.', tvBtn: 'כניסה עם קוד מהטלפון',
+    tvWait: 'ממתין לאישור מהטלפון…', tvNew: 'קוד חדש', tvExp: 'הקוד פג. אפשר לבקש קוד חדש.', tvScan: 'אפשר לסרוק כדי לפתוח את האתר בטלפון', tvOk: 'הטלוויזיה מחוברת',
+    pairT: 'חיבור טלוויזיה או מחשב', pairS: 'במכשיר החדש בוחרים "כניסה עם קוד מהטלפון" ומקלידים כאן את הקוד שמופיע בו. המכשיר יתחבר לחשבון הזה, אז חברו רק מכשיר שלכם.',
+    pairPh: 'הקוד מהמסך, למשל ABCD-2345', pairGo: 'חיבור המכשיר', pairBad: 'הקוד לא תקין. הוא בן 8 תווים, אותיות באנגלית ומספרים.', pairDone: 'נשלח. המכשיר השני יתחבר בעוד כמה שניות.',
+    pairUsed: 'הקוד הזה כבר שימש. בקשו קוד חדש במכשיר השני.',
     center: 'החשבון שלי', tProfiles: 'פרופילים', tAccount: 'פרטי החשבון', tStats: 'צפייה ונתונים', tDevices: 'מכשירים', tPrivacy: 'פרטיות ואבטחה',
     profilesS: 'לכל פרופיל יש זיכרון משלו: רשימות, הגדרות, היסטוריה ושיחות עם CineAI.', current: 'הפרופיל הנוכחי', switchTo: 'מעבר לפרופיל',
     acctS: 'השם, התמונה והסיסמה של החשבון.', acctName: 'שם החשבון', acctPhoto: 'תמונת החשבון',
@@ -116,7 +124,7 @@ const STR = {
     export: 'הורדת הנתונים', clearProf: 'איפוס נתוני הפרופיל', clearProfQ: 'למחוק את הרשימות, ההגדרות וההיסטוריה של הפרופיל הזה?', cleared: 'נתוני הפרופיל נמחקו.',
     storage: 'נפח בשימוש', devicesS: 'המכשירים שמחוברים לחשבון. אם אתם לא מזהים מכשיר – נתקו אותו והחליפו סיסמה.',
     thisDev: 'המכשיר הזה', lastSeen: 'פעילות אחרונה', disconnect: 'ניתוק', disconnected: 'המכשיר נותק.',
-    privS: 'מה נשמר, איפה, ואיך זה מוגן.', storedT: 'מה נשמר בחשבון', stored: ['השם, האימייל והתמונה שבחרתם', 'הפרופילים והקודים שלהם (הקוד נשמר מוצפן בגיבוב)', 'הרשימות, ההגדרות, היסטוריית הצפייה והשיחות עם CineAI', 'זמני צפייה וגלישה, ורשימת המכשירים המחוברים'],
+    privS: 'מה נשמר, איפה, ואיך זה מוגן.', storedT: 'מה נשמר בחשבון', stored: ['השם, האימייל והתמונה שבחרתם', 'הפרופילים והקודים שלהם (הקוד נשמר מוצפן בגיבוב)', 'הרשימות, ההגדרות, היסטוריית הצפייה והשיחות עם CineAI', 'זמני צפייה וגלישה, ורשימת המכשירים המחוברים', 'מה שתבחרו לשתף: רשימות ששיתפתם, הדירוג בכוכבים (בלי שם), התוצאה בחידון היומי בשם הפרופיל, וחדרי צפייה משותפת עד שהם נסגרים'],
     whereT: 'איפה ואיך', where: ['הנתונים נשמרים ב-Google Firebase, במרכז הנתונים של Google בתל אביב', 'הסיסמה מנוהלת על ידי Google ואף אחד – גם לא אנחנו – לא יכול לראות אותה', 'רק אתם יכולים לקרוא ולשנות את הנתונים של החשבון שלכם', 'תמונות שמעלים עוברות דחיסה, והמידע הנסתר שבהן (כמו מיקום) נמחק'],
     loginsT: 'כניסות אחרונות לחשבון', tipsT: 'טיפים לאבטחה', tips: ['בחרו סיסמה שאתם לא משתמשים בה באתרים אחרים', 'נעלו בקוד פרופילים שאתם לא רוצים שילדים ייכנסו אליהם', 'התנתקו כשאתם משתמשים במחשב ציבורי', 'אם משהו נראה חשוד – נתקו את כל המכשירים והחליפו סיסמה'],
     policy: 'למדיניות הפרטיות המלאה', guestT: 'אתם גולשים כאורחים', guestS: 'הנתונים שלכם נשמרים רק בדפדפן הזה. עם חשבון הם נשמרים בענן, זמינים בכל מכשיר ומוגנים בסיסמה.',
@@ -178,6 +186,11 @@ const STR = {
     pinOn: 'Lock with a code', pinOnS: 'Ask for a 4-digit code before entering this profile', setPin: 'Choose code', save: 'Save', cancel: 'Cancel',
     delProf: 'Delete profile', delProfQ: 'Delete the profile "{n}" and everything saved in it?', delete: 'Delete',
     imgBad: 'We could not read that image. Try another file.',
+    tvT: 'Sign in with your phone', tvS: 'On a phone or computer that is already signed in to Drive Play, open your account, go to "Devices" and type this code.', tvBtn: 'Sign in with a code from your phone',
+    tvWait: 'Waiting for your phone…', tvNew: 'New code', tvExp: 'The code expired. You can get a new one.', tvScan: 'Scan to open the site on your phone', tvOk: 'The TV is signed in',
+    pairT: 'Connect a TV or computer', pairS: 'On the new device choose "Sign in with a code from your phone" and type the code it shows here. The device will sign in to this account, so only connect your own devices.',
+    pairPh: 'The code on the screen, e.g. ABCD-2345', pairGo: 'Connect the device', pairBad: 'The code is not valid. It has 8 characters: English letters and numbers.', pairDone: 'Sent. The other device will sign in within a few seconds.',
+    pairUsed: 'This code was already used. Get a new code on the other device.',
     center: 'My account', tProfiles: 'Profiles', tAccount: 'Account details', tStats: 'Watching & data', tDevices: 'Devices', tPrivacy: 'Privacy & security',
     profilesS: 'Every profile has its own memory: lists, settings, history and CineAI chats.', current: 'Current profile', switchTo: 'Switch to profile',
     acctS: 'Your account name, photo and password.', acctName: 'Account name', acctPhoto: 'Account photo',
@@ -193,7 +206,7 @@ const STR = {
     export: 'Download my data', clearProf: 'Reset profile data', clearProfQ: 'Delete the lists, settings and history of this profile?', cleared: 'Profile data deleted.',
     storage: 'Storage used', devicesS: 'Devices signed in to your account. If you do not recognise one, sign it out and change your password.',
     thisDev: 'This device', lastSeen: 'Last active', disconnect: 'Sign out', disconnected: 'The device was signed out.',
-    privS: 'What is saved, where, and how it is protected.', storedT: 'What the account stores', stored: ['The name, email and photo you chose', 'Your profiles and their codes (codes are stored hashed)', 'Lists, settings, watch history and CineAI chats', 'Watching and browsing time, and the list of signed-in devices'],
+    privS: 'What is saved, where, and how it is protected.', storedT: 'What the account stores', stored: ['The name, email and photo you chose', 'Your profiles and their codes (codes are stored hashed)', 'Lists, settings, watch history and CineAI chats', 'Watching and browsing time, and the list of signed-in devices', 'What you choose to share: lists you shared, star ratings (without a name), your daily quiz score under the profile name, and watch-together rooms until they close'],
     whereT: 'Where and how', where: ['Data is stored in Google Firebase, in Google\'s Tel Aviv data center', 'Your password is handled by Google and nobody – including us – can see it', 'Only you can read and change your account data', 'Uploaded photos are compressed and their hidden metadata (such as location) is removed'],
     loginsT: 'Recent sign-ins', tipsT: 'Security tips', tips: ['Use a password you do not use anywhere else', 'Lock profiles you do not want kids to open', 'Sign out when you use a public computer', 'If something looks suspicious, sign out all devices and change your password'],
     policy: 'Full privacy policy', guestT: 'You are browsing as a guest', guestS: 'Your data is saved in this browser only. With an account it is kept in the cloud, available on every device and protected by a password.',
@@ -238,7 +251,7 @@ function setLang(l) {
   if (nl !== LANG) EXTRA = null;
   LANG = nl;
   document.documentElement.lang = LANG; document.documentElement.dir = T('dir') === 'ltr' && !['ar', 'fa', 'ur', 'yi'].includes(LANG) ? 'ltr' : 'rtl';
-  if (LANG !== 'he' && LANG !== 'en') fetch('i18n/' + LANG + '.json', { cache: 'force-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (j) { EXTRA = j; if (VIEW.redraw) VIEW.redraw(); } }).catch(() => {});
+  if (LANG !== 'he' && LANG !== 'en') fetch('i18n/' + LANG + '.json?v=2', { cache: 'force-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (j) { EXTRA = j; if (VIEW.redraw) VIEW.redraw(); } }).catch(() => {});
 }
 const fmtDur = sec => { sec = Math.max(0, Math.round(sec || 0)); const m = Math.round(sec / 60); if (m < 1) return T('zero'); if (m < 60) return T('mins', { n: m }); const h = Math.floor(m / 60), r = m % 60; return r ? T('hours', { h, m: r }) : T('hoursOnly', { h }); };
 const fmtDate = t => { try { return new Date(t).toLocaleDateString(LANG === 'he' ? 'he-IL' : LANG, { year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) { return new Date(t).toDateString(); } };
@@ -422,7 +435,7 @@ function sendEnter() {
   const kv = CUR.kv || {};
   /* once inside, the account screens use the same language as the site (Hebrew unless the profile chose another) */
   if (CUR.type === 'acct') setLang(kv.dp_lang || 'he');
-  post({ t: 'enter', kv, prof: profView(CUR.prof), acct: acctView(), pro: proView(), lang: kv.dp_lang || '', persist: DEVSTORE_OK });
+  post({ t: 'enter', kv, prof: profView(CUR.prof), acct: acctView(), pro: proView(), lang: kv.dp_lang || '', persist: DEVSTORE_OK, soc: SOCIAL_ON && CUR.type === 'acct' ? 1 : 0 });
   SS.set('dpa_visit', { u: CUR.type === 'guest' ? 'guest' : CUR.uid, p: CUR.prof && CUR.prof.id });
   hideAll(); ui(false);
 }
@@ -733,6 +746,7 @@ function welcome(note) {
       <div class="col">
         <button class="btn pri block" type="button" data-go="signup">${T('signup')}</button>
         <button class="btn ghost block" type="button" data-go="signin">${T('signin')}</button>
+        ${SOCIAL_ON ? `<button class="link" type="button" data-go="tv" style="margin-top:6px">${ic('device')} ${T('tvBtn')}</button>` : ''}
       </div>
       <p class="hint" style="text-align:center;margin-top:12px">${T('socialAgree', { u: PRIVACY_URL })}</p>
       ${REQUIRE_ACCOUNT ? '' : `<div class="mt" style="text-align:center"><button class="link" type="button" data-go="guest">${T('guest')}</button><p class="hint" style="text-align:center">${T('guestNote')}</p></div>`}
@@ -742,7 +756,7 @@ function welcome(note) {
     const a = e.target.closest('[data-acct]');
     if (a) { const ac = D.accts[a.dataset.acct]; if (ac && ac.rt) { D.cur = ac.uid; saveD(); startAccount(ac.uid, true); } else if (ac && ac.pv && ac.pv !== 'password') { const k = Object.keys(PID).find(x => PID[x] === ac.pv); socialSignIn(k, a, $('#wErr')); } else signin(ac && ac.em); return; }
     const g = e.target.closest('[data-go]'); if (!g) return;
-    if (g.dataset.go === 'signup') signup(); else if (g.dataset.go === 'signin') signin(); else if (!REQUIRE_ACCOUNT) enterGuest();
+    if (g.dataset.go === 'signup') signup(); else if (g.dataset.go === 'signin') signin(); else if (g.dataset.go === 'tv') tvSignIn(); else if (!REQUIRE_ACCOUNT) enterGuest();
   };
 }
 function formShell(title, sub, body) {
@@ -1476,7 +1490,19 @@ async function tabDevices(m) {
   ss.sort((x, y) => (x.id === a.sid ? -1 : y.id === a.sid ? 1 : (y.l || 0) - (x.l || 0)));
   m.innerHTML = `<h2>${T('tDevices')}</h2><p class="lead">${T('devicesS')}</p>
     <div class="sec"><div class="list">${ss.map(s => `<div class="li"><span class="devi">${ic(s.k === 'desktop' ? 'device' : 'phone')}</span><span class="t"><b>${esc(s.d || T('unknownDev'))}</b><small>${T('lastSeen')}: ${fmtWhen(s.l || s.f || now())}</small></span>${s.id === a.sid ? `<span class="chip g">${T('thisDev')}</span>` : `<button class="btn ghost sm" type="button" data-sid="${esc(s.id)}">${T('disconnect')}</button>`}</div>`).join('') || `<p class="d">—</p>`}</div></div>
-    <div class="row wrap"><button class="btn ghost sm" type="button" data-x="outall">${T('signoutAll')}</button></div>`;
+    <div class="row wrap"><button class="btn ghost sm" type="button" data-x="outall">${T('signoutAll')}</button></div>
+    ${SOCIAL_ON ? '' : '<!--'}<div class="sec"><h3>${T('pairT')}</h3><p class="d">${T('pairS')}</p>
+      <form class="row wrap" id="pairF" novalidate style="gap:8px;margin-top:8px"><input class="inp ltr" id="pairC" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${esc(T('pairPh'))}" aria-label="${esc(T('pairPh'))}" style="max-width:240px;letter-spacing:.12em;text-transform:uppercase"><button class="btn pri sm" type="submit">${T('pairGo')}</button></form>
+      <p class="small" id="pairM" role="status" style="margin-top:6px"></p></div>${SOCIAL_ON ? '' : '-->'}`;
+  if ($('#pairF', m)) $('#pairF', m).onsubmit = async ev => {
+    ev.preventDefault();
+    const inp = $('#pairC', m), msg = $('#pairM', m), btn = $('#pairF button', m), code = pairNorm(inp.value);
+    if (!code) { msg.textContent = T('pairBad'); inp.setAttribute('aria-invalid', 'true'); return; }
+    inp.removeAttribute('aria-invalid'); busy(btn, true);
+    try { await pairSend(code); msg.textContent = T('pairDone'); inp.value = ''; }
+    catch (x) { msg.textContent = x.status === 409 || /ALREADY_EXISTS/.test(x.code) ? T('pairUsed') : errMsg(x); }
+    busy(btn, false);
+  };
   m.onclick = async e => {
     const b = e.target.closest('[data-sid]');
     if (b) { busy(b, true); try { await fsDel(uid, 'users/' + uid + '/sessions/' + b.dataset.sid); toast(T('disconnected')); drawTab(); } catch (x) { busy(b, false); toast(errMsg(x)); } return; }
@@ -1486,7 +1512,7 @@ async function tabDevices(m) {
 function tabPrivacy(m) {
   const g = CUR.type === 'guest'; const L = (!g && CUR.user.L) || [];
   m.innerHTML = `<h2>${T('tPrivacy')}</h2><p class="lead">${T('privS')}</p>
-    <div class="sec"><h3>${T('storedT')}</h3><ul class="bullets">${T('stored').map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+    <div class="sec"><h3>${T('storedT')}</h3><ul class="bullets">${T('stored').slice(0, SOCIAL_ON ? 9 : 4).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
     <div class="sec"><h3>${T('whereT')}</h3><ul class="bullets">${T('where').map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
     ${g ? '' : `<div class="sec"><h3>${T('loginsT')}</h3><div class="list">${L.slice().reverse().slice(0, 10).map(l => `<div class="li"><span class="devi">${ic(l.k === 'desktop' ? 'device' : 'phone')}</span><span class="t"><b>${esc(l.d || T('unknownDev'))}</b><small>${fmtWhen(l.at)}</small></span></div>`).join('') || '<p class="d">—</p>'}</div></div>`}
     <div class="sec"><h3>${T('tipsT')}</h3><ul class="bullets">${T('tips').map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
@@ -1579,6 +1605,158 @@ async function begin() {
   splash(T('loading')); await sleep(250); welcome();
 }
 
+
+/* ---------- shared features ----------
+   The page asks with {t:'soc', id, op, a}; only these operations exist and each one writes only
+   what firestore.rules allow: watch-together rooms (rooms/), shared lists (pub/), community star
+   ratings (rt/<title>/u/<uid>, no name), the daily quiz table (qz/<day>/u/<uid>, profile name)
+   and the one-time TV sign-in hand-over (pair/). */
+const SOC_ID = /^[a-z0-9]{8,20}$/;
+/* codes people read aloud or type: no 0/o, 1/l/i */
+const SID_ABC = 'abcdefghjkmnpqrstuvwxyz23456789';
+const sid = n => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => SID_ABC[b % SID_ABC.length]).join('');
+const cleanStr = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n);
+const rtKey = id => cleanStr(id, 100).replace(/[^A-Za-z0-9_-]/g, c => '~' + c.charCodeAt(0).toString(16));
+const fsCreate = (uid, path, obj) => fsReq(uid, 'PATCH', path, { fields: encFields(obj) }, 'currentDocument.exists=false');
+async function fsRaw(uid, method, path, body) {
+  const url = FS.replace(/\/documents\/$/, '/documents' + path);
+  const go = tok => jfetch(url, { method, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  try { return await go(await idToken(uid)); } catch (e) { if (e.status !== 401) throw e; await idToken(uid, true); return go(TOK[uid].id); }
+}
+function roomDoc(a, extra) {
+  const o = { it: cleanStr(a.it, 80), v: cleanStr(a.v, 300), si: Math.max(-1, Math.min(999, a.si | 0)), ei: Math.max(-1, Math.min(9999, a.ei | 0)),
+    t: Math.max(0, Math.min(86400, +a.t || 0)), p: !!a.p, ti: cleanStr(a.ti, 80), at: now() };
+  return Object.assign(o, extra || {});
+}
+const SOC_LAST = {};
+async function socOp(op, a) {
+  if (!SOCIAL_ON) throw new ApiErr('NOT_READY', 503);
+  if (!CUR || CUR.type !== 'acct') throw new ApiErr('SIGNED_OUT', 401);
+  const uid = CUR.uid, prof = CUR.prof || {}, pn = cleanStr(prof.n, 24) || 'Drive Play';
+  a = a && typeof a === 'object' ? a : {};
+  /* at most one write of each kind per second */
+  if (/\.(new|set|pub|del|end)$/.test(op)) { const t = now(); if (SOC_LAST[op] && t - SOC_LAST[op] < 900) throw new ApiErr('TOO_FAST', 429); SOC_LAST[op] = t; }
+  switch (op) {
+    case 'room.new': { const r = sid(10); await fsCreate(uid, 'rooms/' + r, roomDoc(a, { h: uid, n: pn, x: now() + 12 * 3600e3 })); return { rid: r }; }
+    case 'room.set': { if (!SOC_ID.test(a.rid)) throw new ApiErr('BAD_ID', 400); const d = roomDoc(a); await fsPatch(uid, 'rooms/' + a.rid, d); return {}; }
+    case 'room.get': {
+      if (!SOC_ID.test(a.rid)) throw new ApiErr('BAD_ID', 400);
+      const j = await fsRaw(uid, 'POST', ':batchGet', { documents: [DOCNAME('rooms/' + a.rid)] });
+      const it = Array.isArray(j) ? j[0] : null;
+      if (!it || !it.found) return { room: null };
+      const d = decFields(it.found.fields || {});
+      /* server times: how long ago the host wrote this, without trusting either device's clock */
+      const age = Math.max(0, (Date.parse(it.readTime) - Date.parse(it.found.updateTime)) / 1000) || 0;
+      return { room: { it: d.it, v: d.v, si: d.si, ei: d.ei, t: d.t, p: d.p, ti: d.ti, n: d.n, me: d.h === uid, age } };
+    }
+    case 'room.end': { if (!SOC_ID.test(a.rid)) throw new ApiErr('BAD_ID', 400); await fsDel(uid, 'rooms/' + a.rid); return {}; }
+    case 'list.pub': {
+      if (prof.kids) throw new ApiErr('KIDS', 403);
+      const ids = (Array.isArray(a.ids) ? a.ids : []).map(x => cleanStr(x, 60)).filter(Boolean).slice(0, 200);
+      const doc = { o: uid, n: pn, t: cleanStr(a.t, 60) || pn, ids, at: now() };
+      if (SOC_ID.test(a.lid || '')) { try { await fsPatch(uid, 'pub/' + a.lid, doc); return { lid: a.lid }; } catch (e) { if (e.status !== 403 && e.status !== 404) throw e; } }
+      const l = sid(8); await fsCreate(uid, 'pub/' + l, doc); return { lid: l };
+    }
+    case 'list.get': { if (!SOC_ID.test(a.lid || '')) throw new ApiErr('BAD_ID', 400); const d = await fsGet(uid, 'pub/' + a.lid); return { list: d ? { n: d.n, t: d.t, ids: d.ids || [], at: d.at, mine: d.o === uid } : null }; }
+    case 'list.del': { if (!SOC_ID.test(a.lid || '')) throw new ApiErr('BAD_ID', 400); await fsDel(uid, 'pub/' + a.lid); return {}; }
+    case 'rate.set': {
+      const k = rtKey(a.id), sc = a.s | 0; if (!k || sc < 0 || sc > 5) throw new ApiErr('BAD', 400);
+      if (sc) await fsPatch(uid, 'rt/' + k + '/u/' + uid, { s: sc, at: now() }); else await fsDel(uid, 'rt/' + k + '/u/' + uid);
+      return {};
+    }
+    case 'rate.get': {
+      const k = rtKey(a.id); if (!k) throw new ApiErr('BAD', 400);
+      const j = await fsRaw(uid, 'POST', '/rt/' + k + ':runAggregationQuery', { structuredAggregationQuery: { structuredQuery: { from: [{ collectionId: 'u' }] },
+        aggregations: [{ alias: 'a', avg: { field: { fieldPath: 's' } } }, { alias: 'c', count: {} }] } });
+      const f = (Array.isArray(j) && j[0] && j[0].result && j[0].result.aggregateFields) || {};
+      return { avg: f.a ? (dec(f.a) || 0) : 0, n: f.c ? (dec(f.c) || 0) : 0 };
+    }
+    case 'quiz.set': {
+      const day = String(a.day || ''), sc = a.s | 0; if (!/^\d{8}$/.test(day) || sc < 0 || sc > 5) throw new ApiErr('BAD', 400);
+      if (prof.kids) return { skipped: 1 };
+      try { await fsCreate(uid, 'qz/' + day + '/u/' + uid, { n: pn, s: sc, at: now() }); } catch (e) { if (e.status !== 409 && !/ALREADY_EXISTS/.test(e.code)) throw e; }
+      return {};
+    }
+    case 'quiz.top': {
+      const day = String(a.day || ''); if (!/^\d{8}$/.test(day)) throw new ApiErr('BAD', 400);
+      const j = await fsRaw(uid, 'POST', '/qz/' + day + ':runQuery', { structuredQuery: { from: [{ collectionId: 'u' }], orderBy: [{ field: { fieldPath: 's' }, direction: 'DESCENDING' }, { field: { fieldPath: 'at' }, direction: 'ASCENDING' }], limit: 10 } }).catch(async e => {
+        /* without the two-field index: order by score only */
+        if (e.status !== 400 && e.status !== 412 && !/index/i.test(e.code)) throw e;
+        return fsRaw(uid, 'POST', '/qz/' + day + ':runQuery', { structuredQuery: { from: [{ collectionId: 'u' }], orderBy: [{ field: { fieldPath: 's' }, direction: 'DESCENDING' }], limit: 10 } });
+      });
+      const rows = (Array.isArray(j) ? j : []).filter(x => x.document).map(x => { const d = decFields(x.document.fields || {}); return { n: d.n, s: d.s, me: x.document.name.endsWith('/' + uid) }; });
+      return { top: rows };
+    }
+  }
+  throw new ApiErr('BAD_OP', 400);
+}
+
+/* ---------- signing in a TV (or any device) with a code shown on its screen ----------
+   The TV shows an 8-character code. On a device that is already signed in, the code is typed in
+   "Devices"; that device encrypts its sign-in with a key made from the code and leaves it for at most
+   a few minutes under a name also made from the code (pair/). Only someone who sees the code can
+   find it or read it; the TV reads it once and deletes it. */
+const PAIR_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const pairNorm = v => { const c = String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); return c.length === 8 && [...c].every(ch => PAIR_ABC.includes(ch)) ? c : ''; };
+const b64e = u8 => btoa(String.fromCharCode(...u8));
+const b64d = s => Uint8Array.from(atob(s), ch => ch.charCodeAt(0));
+async function pairKeys(code) {
+  const te = new TextEncoder();
+  const h = new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('drive-play-pair|' + code)));
+  const doc = Array.from(h.slice(0, 16), b => b.toString(16).padStart(2, '0')).join('');
+  const base = await crypto.subtle.importKey('raw', te.encode(code), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: te.encode('dp-pair-salt|' + doc), iterations: 150000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  return { doc, key };
+}
+async function pairSend(code) {
+  if (!CUR || CUR.type !== 'acct') throw new ApiErr('SIGNED_OUT', 401);
+  const uid = CUR.uid, a = D.accts[uid]; if (!a || !a.rt) throw new ApiErr('SIGNED_OUT', 401);
+  const { doc, key } = await pairKeys(code), iv = crypto.getRandomValues(new Uint8Array(12));
+  const body = new TextEncoder().encode(JSON.stringify({ rt: a.rt, em: a.em || '', pv: a.pv || 'password', n: (CUR.user && CUR.user.n) || '' }));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, body));
+  await fsCreate(uid, 'pair/' + doc, { c: b64e(ct), iv: b64e(iv), at: now() });
+}
+let PAIR_RUN = 0;
+function tvSignIn() {
+  const run = ++PAIR_RUN; VIEW.name = 'tv'; VIEW.redraw = null;
+  let code = ''; for (const b of crypto.getRandomValues(new Uint8Array(8))) code += PAIR_ABC[b % PAIR_ABC.length];
+  const shown = code.slice(0, 4) + '-' + code.slice(4), until = now() + 5 * 60e3;
+  const st = stage(`<button class="back" type="button" data-go="welcome" aria-label="${T('back')}">${ic('back')}</button>
+    <img class="logo sm" src="logo.webp" alt="Drive Play" width="96" height="96"><h1>${T('tvT')}</h1><p class="sub">${T('tvS')}</p>
+    <div class="card" style="text-align:center">
+      <p dir="ltr" style="font:800 clamp(34px,7vw,56px)/1.1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.14em;margin:6px 0 10px" aria-label="${esc(code.split('').join(' '))}">${shown}</p>
+      <p class="small muted" id="tvM" role="status"><span class="spin" style="vertical-align:middle"></span> ${T('tvWait')}</p>
+      <div id="tvQ" style="display:grid;justify-items:center;gap:6px;margin-top:10px"></div>
+      <button class="btn ghost sm mt" type="button" data-go="new">${T('tvNew')}</button>
+    </div>`, { fx: false });
+  st.onclick = e => { const g = e.target.closest('[data-go]'); if (!g) return; if (g.dataset.go === 'welcome') { PAIR_RUN++; welcome(); } else tvSignIn(); };
+  /* QR code that opens the site on the phone (the library is small and loads only here) */
+  (window.qrcode ? Promise.resolve() : new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'qrcode.min.js'; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); }))
+    .then(() => { if (run !== PAIR_RUN) return; const q = window.qrcode(0, 'M'); q.addData(SITE + '%D7%A6%D7%A4%D7%99%D7%99%D7%94-%D7%97%D7%95%D7%A4%D7%A9%D7%99%D7%AA'); q.make(); const box = $('#tvQ'); if (box) box.innerHTML = `<div style="background:#fff;padding:8px;width:148px">${q.createSvgTag({ cellSize: 4, margin: 0, scalable: true })}</div><small class="muted">${T('tvScan')}</small>`; })
+    .catch(() => {});
+  pairKeys(code).then(async ({ doc, key }) => {
+    const url = FS.replace(/\/documents\/$/, '/documents:batchGet') + '?key=' + CFG.key;
+    while (run === PAIR_RUN && VIEW.name === 'tv') {
+      if (now() > until) { const m = $('#tvM'); if (m) m.textContent = T('tvExp'); return; }
+      await sleep(2500);
+      if (run !== PAIR_RUN) return;
+      let j; try { j = await jfetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ documents: [DOCNAME('pair/' + doc)] }) }, 1); } catch (e) { continue; }
+      const it = Array.isArray(j) ? j[0] : null; if (!it || !it.found) continue;
+      const f = decFields(it.found.fields || {});
+      jfetch(FS + 'pair/' + doc + '?key=' + CFG.key, { method: 'DELETE' }, 1).catch(() => {});
+      try {
+        const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(f.iv) }, key, b64d(f.c));
+        const x = JSON.parse(new TextDecoder().decode(plain));
+        const t = await jfetch(TOKEN, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(x.rt) });
+        const acc = storeSession({ localId: t.user_id, email: x.em, refreshToken: t.refresh_token || x.rt, idToken: t.id_token, expiresIn: t.expires_in }, Object.assign({ pv: x.pv || 'password' }, x.n ? { n: x.n } : {}));
+        D.cur = acc.uid; saveD(); toast(T('tvOk'));
+        await startAccount(acc.uid, true, { justIn: true });
+      } catch (e) { const m = $('#tvM'); if (m) m.textContent = errMsg(e); }
+      return;
+    }
+  });
+}
+
 /* local test hook (only on localhost) */
 if (DEV) window.__dpa = { get CUR() { return CUR; }, saveUser, rid, fsList, fsDel, authCall, idToken, ppOpen(v) { PP_OK = v; } };
 
@@ -1603,6 +1781,12 @@ addEventListener('message', e => {
     case 'stat': onStat(m); break;
     case 'open': if (ENTERED) { const v = String(m.view || '').slice(0, 300); if (v.startsWith('block:')) blockFlow(v.slice(6)); else center(v); } break;
     case 'flush': flushAll(true); break;
+    case 'soc': {
+      const id = m.id;
+      if (!ENTERED) { post({ t: 'socr', id, ok: false, e: 'NOT_READY' }); break; }
+      socOp(String(m.op || ''), m.a).then(r => post({ t: 'socr', id, ok: true, r }), x => post({ t: 'socr', id, ok: false, e: (x && x.code) || 'ERR' }));
+      break;
+    }
   }
 });
 addEventListener('keydown', e => {
