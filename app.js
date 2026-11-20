@@ -29,7 +29,7 @@ const PAY_API = 'https://script.google.com/macros/s/AKfycbz2NNQCeAG4gL6UERqDdiFD
 const PRO_ENABLED = false;
 /* shared features (watch together, shared lists, community ratings, quiz table, TV sign-in by code):
    switch on only after the matching rules are published in firestore.rules */
-const SOCIAL_ON = false;
+const SOCIAL_ON = true;
 const PRO_PRICE = { m: '₪14.90', y: '₪119' };
 /* Pages that need Pro. A page can also ask for it by sending pro:1 in its init message.
    Only CineAI. The library, free watching, the TV channels and the YouTube playlists stay free for everyone
