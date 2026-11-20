@@ -292,3 +292,5 @@ select.inp option{background:#0b1322;color:#fff}
 .blkps{max-height:46vh;overflow:auto}
 .blkps .tg .row{gap:10px}
 .blkps .av{width:34px;height:34px;font-size:.95rem;border-radius:9px}
+/* Drive Play v5 design line: straight corners everywhere (spinners and round progress indicators keep their shape) */
+*:not([class*="spin"]):not([class*="loader"]):not(.ring):not(.ring *),*::before,*::after{border-radius:0!important}

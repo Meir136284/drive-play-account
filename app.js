@@ -8,7 +8,7 @@
 const CFG = { key: 'AIzaSyAJijGrpQ6rIjhtjkHmMrUKxVfoh6o7v2w', project: 'bustling-walker-439912-m7' };
 const SITE = 'https://sites.google.com/view/drive-play-tv/';
 const PRIVACY_URL = SITE + '%D7%AA%D7%A0%D7%90%D7%99-%D7%A9%D7%99%D7%9E%D7%95%D7%A9-%D7%95%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA-drive-play';
-const PCOLS = ['#2F7BFF', '#EE2B23', '#3DDC6B', '#FFB020', '#B04BFF', '#22B5FF', '#FF5C8A', '#8BC34A'];
+const PCOLS = ['#2F7BFF', '#EE2B23', '#3DDC6B', '#FFB020', '#14B8A6', '#22B5FF', '#FF5C8A', '#8BC34A'];
 const MAX_PROFILES = 6, MAX_ACCTS = 5;
 const PROD_ORIGIN = /^https:\/\/[0-9a-z-]+-atari-embeds\.googleusercontent\.com$/;
 const DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
