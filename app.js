@@ -1269,7 +1269,19 @@ function center(tab) {
     if (act.dataset.act === 'close') closeCenter(); else if (act.dataset.act === 'signout') signOut();
   };
   drawTab();
+  // narrow screens: the tabs are one scrolling row, bring the open tab into view
+  // (measured after the frame has grown to full size)
+  clearTimeout(fitTabT); fitTabT = setTimeout(fitTab, 450);
 }
+var fitTabT = 0, fitTabRT = 0;
+function fitTab() {
+  const c = $('#center'); if (!c || c.hidden) return;
+  const sd = $('.side', c), st = $('.tab[aria-selected=true]', c);
+  if (!sd || !st || sd.scrollWidth <= sd.clientWidth) return;
+  const sr = sd.getBoundingClientRect(), tr = st.getBoundingClientRect();
+  if (tr.left < sr.left + 4 || tr.right > sr.right - 4) sd.scrollLeft += (tr.left + tr.width / 2) - (sr.left + sr.width / 2);
+}
+addEventListener('resize', () => { clearTimeout(fitTabRT); fitTabRT = setTimeout(fitTab, 200); });
 function closeCenter() { hideCenter(); ui(false); }
 function drawTab() {
   const m = $('#cMain'); if (!m) return;
